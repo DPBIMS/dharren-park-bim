@@ -1,24 +1,26 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import './lessons.css';
+import lessons from '@/lib/lessonsData';
 
-const lessons = [
-  { id:1, num:'01', title:'What is BIM? A Complete Introduction',       desc:'Understand the core concept of BIM, its history, and why it transformed the construction industry.', cat:'beginner',     topic:'general',     locked:false },
-  { id:2, num:'02', title:'BIM vs CAD: Key Differences Explained',       desc:'Learn why BIM is not just 3D CAD and how the shift in workflow changes everything.',                   cat:'beginner',     topic:'general',     locked:false },
-  { id:3, num:'03', title:'Getting Started with Autodesk Revit',          desc:'Your first steps inside Revit — interface overview, project setup, and understanding families.',        cat:'beginner',     topic:'revit',       locked:false },
-  { id:4, num:'04', title:'Understanding LOD: Level of Development',      desc:'What LOD 100 to LOD 500 means, when to use each level, and how it affects project delivery.',          cat:'beginner',     topic:'standards',   locked:true  },
-  { id:5, num:'05', title:'BIM Execution Plan (BEP) Fundamentals',        desc:'How to read and write a BIM Execution Plan — the document that governs every BIM project.',            cat:'beginner',     topic:'standards',   locked:true  },
-  { id:6, num:'06', title:'Revit Families: System, Loadable & In-Place',  desc:'Deep dive into the three family types in Revit, when to use each, and best practices.',               cat:'intermediate', topic:'revit',       locked:true  },
-  { id:7, num:'07', title:'Clash Detection with Navisworks',               desc:'Step-by-step guide to running clash detection, interpreting results, and coordinating with the team.',  cat:'intermediate', topic:'navisworks',  locked:true  },
-  { id:8, num:'08', title:'MEP Coordination in BIM Projects',              desc:'How mechanical, electrical, and plumbing models are coordinated using BIM.',                            cat:'intermediate', topic:'coordination',locked:true  },
-  { id:9, num:'09', title:'IFC: Open BIM Standard Explained',              desc:'What IFC is, why it matters for interoperability, and how to export and import IFC files correctly.',   cat:'intermediate', topic:'ifc',         locked:true  },
-  { id:10,num:'10', title:'BIM 360 for Project Collaboration',             desc:'Using Autodesk BIM 360 to manage documents, coordinate models, and track issues across the team.',     cat:'intermediate', topic:'bim360',      locked:true  },
-  { id:11,num:'11', title:'4D BIM: Linking Schedule to the Model',         desc:'How to connect your Revit model to a project schedule and simulate construction sequencing.',           cat:'advanced',     topic:'coordination',locked:true  },
-  { id:12,num:'12', title:'BIM in the Philippines: Standards & Opportunities',desc:'BIM adoption in PH construction, government mandates, and career opportunities.',                   cat:'advanced',     topic:'general',     locked:true  },
-];
-
-const topicLabel = { revit:'Revit', standards:'BIM Standards', coordination:'Coordination', navisworks:'Navisworks', bim360:'BIM 360', ifc:'IFC', general:'General BIM' };
+const tagStyle = {
+  revit:        { bg:'rgba(37,99,235,0.12)',  color:'#60a5fa', border:'rgba(37,99,235,0.2)'  },
+  standards:    { bg:'rgba(139,92,246,0.12)', color:'#a78bfa', border:'rgba(139,92,246,0.2)' },
+  coordination: { bg:'rgba(20,184,166,0.12)', color:'#2dd4bf', border:'rgba(20,184,166,0.2)' },
+  navisworks:   { bg:'rgba(245,158,11,0.12)', color:'#fbbf24', border:'rgba(245,158,11,0.2)' },
+  bim360:       { bg:'rgba(236,72,153,0.12)', color:'#f472b6', border:'rgba(236,72,153,0.2)' },
+  ifc:          { bg:'rgba(34,197,94,0.12)',  color:'#4ade80', border:'rgba(34,197,94,0.2)'  },
+  general:      { bg:'rgba(107,114,128,0.12)',color:'#9ca3af', border:'rgba(107,114,128,0.2)'},
+};
+const tagLabel = {
+  revit:'Revit', standards:'BIM Standards', coordination:'Coordination',
+  navisworks:'Navisworks', bim360:'BIM 360', ifc:'IFC', general:'General BIM',
+};
+const catColor = {
+  beginner:     { bg:'rgba(34,197,94,0.1)',  c:'#4ade80' },
+  intermediate: { bg:'rgba(245,158,11,0.1)', c:'#fbbf24' },
+  advanced:     { bg:'rgba(239,68,68,0.1)',  c:'#f87171' },
+};
 
 export default function LessonsPage() {
   const [activeCat,   setActiveCat]   = useState('all');
@@ -28,100 +30,109 @@ export default function LessonsPage() {
   const filtered = lessons.filter(l => {
     const matchCat   = activeCat   === 'all' || l.cat   === activeCat;
     const matchTopic = activeTopic === 'all' || l.topic === activeTopic;
-    const matchSearch = l.title.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = l.title.toLowerCase().includes(search.toLowerCase()) ||
+                        l.desc.toLowerCase().includes(search.toLowerCase());
     return matchCat && matchTopic && matchSearch;
   });
 
   return (
-    <main className="lessons-page">
+    <main style={{ background:'#0a0e1a', color:'#e8eaf0', minHeight:'100vh', paddingTop:'80px', fontFamily:"'DM Sans',sans-serif" }}>
+      <div style={{ maxWidth:'1100px', margin:'0 auto', padding:'3rem 2rem' }}>
 
-      <div className="lessons-header">
-        <div className="page-label">Knowledge Library</div>
-        <h1 className="page-title">BIM Lessons</h1>
-        <p className="page-sub">Browse all lessons. Subscribe to unlock full content.</p>
-      </div>
+        {/* Header */}
+        <div style={{ marginBottom:'2.5rem' }}>
+          <div style={{ fontSize:'11px', fontWeight:500, letterSpacing:'2px', textTransform:'uppercase', color:'#3b82f6', marginBottom:'.5rem' }}>Knowledge Library</div>
+          <h1 style={{ fontFamily:"'Syne',sans-serif", fontSize:'2.2rem', fontWeight:800, letterSpacing:'-0.5px', marginBottom:'.5rem' }}>BIM Lessons</h1>
+          <p style={{ color:'#8892a4', fontSize:'15px' }}>Browse all lessons. Subscribe to unlock full content.</p>
+        </div>
 
-      {/* CATEGORY + SEARCH */}
-      <div className="filter-bar">
-        <div className="filter-group">
-          {['all','beginner','intermediate','advanced'].map(cat => (
-            <button
-              key={cat}
-              className={`filter-btn cat-${cat} ${activeCat === cat ? 'active' : ''}`}
-              onClick={() => setActiveCat(cat)}
-            >
-              {cat === 'all' ? 'All Levels' : cat.charAt(0).toUpperCase() + cat.slice(1)}
-            </button>
+        {/* Filter Bar */}
+        <div style={{ display:'flex', flexWrap:'wrap', gap:'1rem', marginBottom:'1.5rem', alignItems:'center', justifyContent:'space-between' }}>
+          <div style={{ display:'flex', flexWrap:'wrap', gap:'.5rem' }}>
+            {[['all','All Levels'],['beginner','Beginner'],['intermediate','Intermediate'],['advanced','Advanced']].map(([val, label]) => (
+              <button key={val} onClick={() => setActiveCat(val)} style={{
+                background: activeCat === val
+                  ? val === 'beginner' ? 'rgba(34,197,94,0.12)' : val === 'intermediate' ? 'rgba(245,158,11,0.12)' : val === 'advanced' ? 'rgba(239,68,68,0.12)' : 'rgba(37,99,235,0.15)'
+                  : 'rgba(255,255,255,0.04)',
+                border: `1px solid ${activeCat === val
+                  ? val === 'beginner' ? 'rgba(34,197,94,0.3)' : val === 'intermediate' ? 'rgba(245,158,11,0.3)' : val === 'advanced' ? 'rgba(239,68,68,0.3)' : 'rgba(37,99,235,0.4)'
+                  : 'rgba(255,255,255,0.08)'}`,
+                borderRadius:'100px', padding:'6px 16px', fontSize:'13px', cursor:'pointer', fontFamily:"'DM Sans',sans-serif",
+                color: activeCat === val
+                  ? val === 'beginner' ? '#4ade80' : val === 'intermediate' ? '#fbbf24' : val === 'advanced' ? '#f87171' : '#fff'
+                  : '#8892a4',
+              }}>{label}</button>
+            ))}
+          </div>
+          <input
+            type="text" placeholder="🔍  Search lessons..."
+            value={search} onChange={e => setSearch(e.target.value)}
+            style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'8px', padding:'8px 14px', color:'#e8eaf0', fontSize:'13px', fontFamily:"'DM Sans',sans-serif", outline:'none', width:'220px' }}
+          />
+        </div>
+
+        {/* Topic Tabs */}
+        <div style={{ display:'flex', flexWrap:'wrap', gap:'.4rem', marginBottom:'1.5rem' }}>
+          {[['all','All Topics'],['revit','Revit'],['standards','BIM Standards'],['coordination','Coordination'],['navisworks','Navisworks'],['bim360','BIM 360'],['ifc','IFC'],['general','General BIM']].map(([val, label]) => (
+            <button key={val} onClick={() => setActiveTopic(val)} style={{
+              background: activeTopic === val ? 'rgba(255,255,255,0.06)' : 'transparent',
+              border: `1px solid ${activeTopic === val ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)'}`,
+              borderRadius:'6px', padding:'4px 12px', fontSize:'12px',
+              color: activeTopic === val ? '#e8eaf0' : '#8892a4',
+              cursor:'pointer', fontFamily:"'DM Sans',sans-serif",
+            }}>{label}</button>
           ))}
         </div>
-        <input
-          type="text"
-          placeholder="Search lessons..."
-          className="search-input"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-      </div>
 
-      {/* TOPIC TABS */}
-      <div className="topic-tabs">
-        {['all','revit','standards','coordination','navisworks','bim360','ifc','general'].map(topic => (
-          <button
-            key={topic}
-            className={`topic-tab ${activeTopic === topic ? 'active' : ''}`}
-            onClick={() => setActiveTopic(topic)}
-          >
-            {topic === 'all' ? 'All Topics' : topicLabel[topic]}
-          </button>
-        ))}
-      </div>
-
-      {/* STATS */}
-      <div className="stats-row">
-        <span className="stat-chip"><strong>{filtered.length}</strong> lessons</span>
-        <span className="dot" />
-        <span className="stat-chip"><strong>3</strong> free previews</span>
-        <span className="dot" />
-        <span className="stat-chip">Updated <strong>June 2026</strong></span>
-      </div>
-
-      {/* GRID */}
-      {filtered.length === 0 ? (
-        <div className="empty-state">
-          <p>🔍</p>
-          <span>No lessons match your filters. Try a different combination.</span>
+        {/* Stats */}
+        <div style={{ display:'flex', gap:'1.5rem', marginBottom:'2rem', flexWrap:'wrap', alignItems:'center', fontSize:'13px', color:'#8892a4' }}>
+          <span><strong style={{ color:'#e8eaf0' }}>{filtered.length}</strong> lessons</span>
+          <span style={{ width:'4px', height:'4px', borderRadius:'50%', background:'rgba(255,255,255,0.08)', display:'inline-block' }}/>
+          <span><strong style={{ color:'#e8eaf0' }}>{lessons.filter(l => l.free).length}</strong> free previews</span>
+          <span style={{ width:'4px', height:'4px', borderRadius:'50%', background:'rgba(255,255,255,0.08)', display:'inline-block' }}/>
+          <span>Updated <strong style={{ color:'#e8eaf0' }}>June 2026</strong></span>
         </div>
-      ) : (
-        <div className="lessons-grid">
-          {filtered.map(lesson => (
-            <div key={lesson.id} className={`lesson-card ${lesson.locked ? 'locked' : ''}`}>
-              <div className="card-top">
-                <div className="card-tags">
-                  <span className={`tag-topic tag-${lesson.topic}`}>{topicLabel[lesson.topic]}</span>
-                  <span className={`cat-badge cat-${lesson.cat}`}>{lesson.cat}</span>
-                  {!lesson.locked && <span className="free-badge">FREE</span>}
-                </div>
-                <div className="card-num">Lesson {lesson.num}</div>
-                <h3 className="card-title">{lesson.title}</h3>
-                {!lesson.locked && <p className="card-desc">{lesson.desc}</p>}
-              </div>
 
-              {lesson.locked ? (
-                <div className="card-locked-body">
-                  <span className="lock-icon">🔒</span>
-                  <span className="lock-text">
-                    Subscribe to unlock — <Link href="/pricing">View Plans</Link>
-                  </span>
+        {/* Grid */}
+        {filtered.length === 0 ? (
+          <div style={{ textAlign:'center', padding:'4rem 2rem', color:'#8892a4' }}>
+            <div style={{ fontSize:'2rem', marginBottom:'.5rem' }}>🔍</div>
+            <div>No lessons match your filters.</div>
+          </div>
+        ) : (
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'1.25rem' }}>
+            {filtered.map(l => {
+              const ts = tagStyle[l.topic];
+              const cs = catColor[l.cat];
+              return (
+                <div key={l.id} style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'14px', overflow:'hidden', display:'flex', flexDirection:'column' }}>
+                  <div style={{ padding:'1.25rem 1.25rem .75rem', flex:1 }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:'.4rem', marginBottom:'.75rem', flexWrap:'wrap' }}>
+                      <span style={{ fontSize:'11px', fontWeight:500, padding:'3px 10px', borderRadius:'5px', background:ts.bg, color:ts.color, border:`1px solid ${ts.border}` }}>{tagLabel[l.topic]}</span>
+                      <span style={{ fontSize:'10px', fontWeight:600, padding:'2px 8px', borderRadius:'4px', background:cs.bg, color:cs.c, textTransform:'uppercase', letterSpacing:'.5px' }}>{l.cat}</span>
+                      {l.free && <span style={{ fontSize:'10px', fontWeight:600, padding:'2px 8px', borderRadius:'4px', background:'rgba(34,197,94,0.1)', color:'#4ade80', border:'1px solid rgba(34,197,94,0.2)' }}>FREE</span>}
+                    </div>
+                    <div style={{ fontSize:'11px', color:'#8892a4', marginBottom:'.4rem' }}>Lesson {l.num}</div>
+                    <div style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:'15px', lineHeight:'1.35', marginBottom:'.5rem' }}>{l.title}</div>
+                    {l.free && <div style={{ fontSize:'13px', color:'#8892a4', lineHeight:'1.65' }}>{l.desc}</div>}
+                  </div>
+                  {l.free ? (
+                    <Link href={`/lessons/${l.id}`} style={{ padding:'.75rem 1.25rem', borderTop:'1px solid rgba(255,255,255,0.08)', display:'flex', alignItems:'center', justifyContent:'space-between', textDecoration:'none' }}>
+                      <span style={{ fontSize:'12px', color:'#3b82f6', fontWeight:500 }}>Read lesson</span>
+                      <span style={{ fontSize:'14px', color:'#8892a4' }}>→</span>
+                    </Link>
+                  ) : (
+                    <div style={{ padding:'.75rem 1.25rem', borderTop:'1px solid rgba(255,255,255,0.08)', display:'flex', alignItems:'center', gap:'.5rem' }}>
+                      <span>🔒</span>
+                      <span style={{ fontSize:'12px', color:'#8892a4' }}>Subscribe to unlock — <Link href="/pricing" style={{ color:'#3b82f6', textDecoration:'none' }}>View Plans</Link></span>
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="card-footer">
-                  <Link href={`/lessons/${lesson.id}`} className="read-more">Read lesson →</Link>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        )}
+      </div>
     </main>
   );
 }
