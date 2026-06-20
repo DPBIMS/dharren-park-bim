@@ -1,6 +1,7 @@
 import './globals.css';
 import { Syne, DM_Sans } from 'next/font/google';
 import Navbar from '@/components/Navbar';
+import BackToTop from '@/components/BackToTop';
 
 const syne = Syne({ subsets: ['latin'], variable: '--font-syne' });
 const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-dm' });
@@ -17,6 +18,7 @@ export default function RootLayout({ children }) {
       <body>
         <Navbar />
         {children}
+        <BackToTop />
       </body>
     </html>
   );

@@ -6,13 +6,13 @@ import { supabase } from '@/lib/supabase';
 import styles from './lesson.module.css';
 
 const topicClass = {
-  revit:         styles.tagRevit,
-  standards:     styles.tagStandards,
-  coordination:  styles.tagCoordination,
-  navisworks:    styles.tagNavisworks,
-  bim360:        styles.tagBim360,
-  ifc:           styles.tagIfc,
-  general:       styles.tagGeneral,
+  revit:        styles.tagRevit,
+  standards:    styles.tagStandards,
+  coordination: styles.tagCoordination,
+  navisworks:   styles.tagNavisworks,
+  bim360:       styles.tagBim360,
+  ifc:          styles.tagIfc,
+  general:      styles.tagGeneral,
 };
 const topicLabel = {
   revit:        'Revit',
@@ -67,7 +67,7 @@ export default function LessonClient({ lesson, allLessons }) {
   }
 
   return (
-    <div>
+    <div style={{ paddingTop: '64px' }}>
       {/* TOP BAR */}
       <div className={styles.topbar}>
         <div className={styles.topbarLeft}>
