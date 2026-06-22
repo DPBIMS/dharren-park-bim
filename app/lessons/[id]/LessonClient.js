@@ -24,15 +24,41 @@ const topicLabel = {
   general:      'General BIM',
 };
 
+// Same plan access rules as dashboard and lessons page
+const PLAN_ACCESS = {
+  free:    (lesson) => lesson.free,
+  basic:   (lesson) => lesson.cat === 'beginner',
+  pro:     (lesson) => lesson.cat === 'beginner' || lesson.cat === 'intermediate',
+  premium: ()       => true,
+};
+
 export default function LessonClient({ lesson, allLessons }) {
   const router = useRouter();
-  const [completed, setCompleted] = useState(false);
+  const [completed,     setCompleted]     = useState(false);
   const [activeSection, setActiveSection] = useState(lesson.sections?.[0]?.id || '');
+  const [activePlan,    setActivePlan]    = useState('free');
+  const [planLoaded,    setPlanLoaded]    = useState(false);
 
   useEffect(() => {
-    async function checkProgress() {
+    async function load() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+
+      // Load plan from user_plans
+      const { data: planData } = await supabase
+        .from('user_plans').select('plan')
+        .eq('user_id', user.id).eq('status', 'active').single();
+
+      if (planData?.plan) {
+        setActivePlan(planData.plan);
+      } else {
+        const { data: profile } = await supabase
+          .from('profiles').select('plan').eq('id', user.id).single();
+        setActivePlan(profile?.plan || 'free');
+      }
+      setPlanLoaded(true);
+
+      // Check lesson completion
       const { data } = await supabase
         .from('lesson_progress')
         .select('completed')
@@ -41,7 +67,7 @@ export default function LessonClient({ lesson, allLessons }) {
         .single();
       if (data?.completed) setCompleted(true);
     }
-    checkProgress();
+    load();
   }, [lesson.id]);
 
   async function toggleComplete() {
@@ -59,12 +85,22 @@ export default function LessonClient({ lesson, allLessons }) {
     }
   }
 
+  function canAccess(lessonToCheck) {
+    if (!lessonToCheck) return false;
+    const checker = PLAN_ACCESS[activePlan] || PLAN_ACCESS.free;
+    return checker(lessonToCheck);
+  }
+
   function renderContent(text) {
     if (!text) return null;
     return text.split('**').map((part, i) =>
       i % 2 === 1 ? <strong key={i}>{part}</strong> : part
     );
   }
+
+  // Find next/prev lesson objects from allLessons for access checking
+  const nextLesson = lesson.next ? allLessons.find(l => l.id === lesson.next.id) : null;
+  const nextIsLocked = planLoaded && nextLesson && !canAccess(nextLesson);
 
   return (
     <div style={{ paddingTop: '64px' }}>
@@ -187,6 +223,7 @@ export default function LessonClient({ lesson, allLessons }) {
 
             {/* PREV / NEXT */}
             <div className={styles.lessonNav}>
+              {/* Previous */}
               {lesson.prev ? (
                 <Link href={`/lessons/${lesson.prev.id}`} className={styles.navCard}>
                   <div className={styles.navDirection}>← Previous</div>
@@ -199,11 +236,22 @@ export default function LessonClient({ lesson, allLessons }) {
                 </div>
               )}
 
+              {/* Next — locked or accessible */}
               {lesson.next ? (
-                <Link href={`/lessons/${lesson.next.id}`} className={`${styles.navCard} ${styles.navCardNext}`}>
-                  <div className={styles.navDirection}>Next →</div>
-                  <div className={styles.navLessonTitle}>{lesson.next.title}</div>
-                </Link>
+                nextIsLocked ? (
+                  // Locked: show upgrade prompt instead of navigation
+                  <Link href="/pricing" className={`${styles.navCard} ${styles.navCardNext}`}
+                    style={{ borderColor:'rgba(245,158,11,0.3)', background:'rgba(245,158,11,0.04)' }}>
+                    <div className={styles.navDirection} style={{ color:'#f59e0b' }}>🔒 Upgrade to unlock</div>
+                    <div className={styles.navLessonTitle} style={{ color:'#8892a4' }}>{lesson.next.title}</div>
+                    <div style={{ fontSize:'11px', color:'#f59e0b', marginTop:'4px', fontWeight:500 }}>View Plans →</div>
+                  </Link>
+                ) : (
+                  <Link href={`/lessons/${lesson.next.id}`} className={`${styles.navCard} ${styles.navCardNext}`}>
+                    <div className={styles.navDirection}>Next →</div>
+                    <div className={styles.navLessonTitle}>{lesson.next.title}</div>
+                  </Link>
+                )
               ) : (
                 <div className={`${styles.navCard} ${styles.navCardNext} ${styles.navDisabled}`}>
                   <div className={styles.navDirection}>Next →</div>
