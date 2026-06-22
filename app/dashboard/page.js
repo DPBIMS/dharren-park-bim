@@ -8,57 +8,77 @@ import './dashboard.css';
 const ADMIN_EMAILS = ['dharrenpark2024@gmail.com'];
 
 const lessons = [
-  { id:1,  num:'01', title:'What is BIM? A Complete Introduction',       cat:'beginner',     topic:'general',      free:true  },
-  { id:2,  num:'02', title:'BIM vs CAD: Key Differences Explained',       cat:'beginner',     topic:'general',      free:true  },
-  { id:3,  num:'03', title:'Getting Started with Autodesk Revit',          cat:'beginner',     topic:'revit',        free:true  },
-  { id:4,  num:'04', title:'Understanding LOD: Level of Development',      cat:'beginner',     topic:'standards',    free:false },
-  { id:5,  num:'05', title:'BIM Execution Plan (BEP) Fundamentals',        cat:'beginner',     topic:'standards',    free:false },
-  { id:6,  num:'06', title:'Revit Families: System, Loadable & In-Place',  cat:'intermediate', topic:'revit',        free:false },
-  { id:7,  num:'07', title:'Clash Detection with Navisworks',               cat:'intermediate', topic:'navisworks',   free:false },
-  { id:8,  num:'08', title:'MEP Coordination in BIM Projects',              cat:'intermediate', topic:'coordination', free:false },
-  { id:9,  num:'09', title:'IFC: Open BIM Standard Explained',              cat:'intermediate', topic:'ifc',          free:false },
-  { id:10, num:'10', title:'BIM 360 for Project Collaboration',             cat:'intermediate', topic:'bim360',       free:false },
-  { id:11, num:'11', title:'4D BIM: Linking Schedule to the Model',         cat:'advanced',     topic:'coordination', free:false },
-  { id:12, num:'12', title:'BIM in the Philippines: Standards & Opportunities',cat:'advanced', topic:'general',      free:false },
+  { id:1,  num:'01', title:'What is BIM? A Complete Introduction',            cat:'beginner',     topic:'general',      free:true  },
+  { id:2,  num:'02', title:'BIM vs CAD: Key Differences Explained',           cat:'beginner',     topic:'general',      free:true  },
+  { id:3,  num:'03', title:'Getting Started with Autodesk Revit',             cat:'beginner',     topic:'revit',        free:true  },
+  { id:4,  num:'04', title:'Understanding LOD: Level of Development',         cat:'beginner',     topic:'standards',    free:false },
+  { id:5,  num:'05', title:'BIM Execution Plan (BEP) Fundamentals',           cat:'beginner',     topic:'standards',    free:false },
+  { id:6,  num:'06', title:'Revit Families: System, Loadable & In-Place',     cat:'intermediate', topic:'revit',        free:false },
+  { id:7,  num:'07', title:'Clash Detection with Navisworks',                  cat:'intermediate', topic:'navisworks',   free:false },
+  { id:8,  num:'08', title:'MEP Coordination in BIM Projects',                 cat:'intermediate', topic:'coordination', free:false },
+  { id:9,  num:'09', title:'IFC: Open BIM Standard Explained',                 cat:'intermediate', topic:'ifc',          free:false },
+  { id:10, num:'10', title:'BIM 360 for Project Collaboration',                cat:'intermediate', topic:'bim360',       free:false },
+  { id:11, num:'11', title:'4D BIM: Linking Schedule to the Model',            cat:'advanced',     topic:'coordination', free:false },
+  { id:12, num:'12', title:'BIM in the Philippines: Standards & Opportunities',cat:'advanced',     topic:'general',      free:false },
 ];
 
 const resources = [
-  { title:'BIM Glossary & Terms',      type:'PDF',  pages:'12 pages', plan:'free',    locked:false },
-  { title:'LOD Reference Sheet',       type:'PDF',  pages:'4 pages',  plan:'pro',     locked:false },
-  { title:'BEP Template',              type:'DOCX', pages:'Editable', plan:'pro',     locked:false },
-  { title:'Clash Detection Checklist', type:'PDF',  pages:'6 pages',  plan:'pro',     locked:false },
-  { title:'4D BIM Workflow Guide',     type:'PDF',  pages:'18 pages', plan:'premium', locked:true  },
-  { title:'PH BIM Standards Summary',  type:'PDF',  pages:'10 pages', plan:'premium', locked:true  },
+  { title:'BIM Glossary & Terms',      type:'PDF',  pages:'12 pages', plan:'free',    },
+  { title:'LOD Reference Sheet',       type:'PDF',  pages:'4 pages',  plan:'pro',     },
+  { title:'BEP Template',              type:'DOCX', pages:'Editable', plan:'pro',     },
+  { title:'Clash Detection Checklist', type:'PDF',  pages:'6 pages',  plan:'pro',     },
+  { title:'4D BIM Workflow Guide',     type:'PDF',  pages:'18 pages', plan:'premium', },
+  { title:'PH BIM Standards Summary',  type:'PDF',  pages:'10 pages', plan:'premium', },
 ];
 
 const quizzes = [
-  { title:'BIM Fundamentals Quiz',   lesson:'Lesson 01', date:'Jun 1, 2026', score:90,  taken:true  },
-  { title:'BIM vs CAD Assessment',   lesson:'Lesson 02', date:'Jun 3, 2026', score:74,  taken:true  },
-  { title:'Revit Essentials Quiz',   lesson:'Lesson 03', date:null,          score:null, taken:false },
-  { title:'LOD Standards Assessment',lesson:'Lesson 04', date:null,          score:null, taken:false, locked:true },
+  { title:'BIM Fundamentals Quiz',    lesson:'Lesson 01', date:'Jun 1, 2026', score:90,   taken:true  },
+  { title:'BIM vs CAD Assessment',    lesson:'Lesson 02', date:'Jun 3, 2026', score:74,   taken:true  },
+  { title:'Revit Essentials Quiz',    lesson:'Lesson 03', date:null,          score:null, taken:false },
+  { title:'LOD Standards Assessment', lesson:'Lesson 04', date:null,          score:null, taken:false, locked:true },
 ];
 
 const topicClass = { revit:'tag-revit', standards:'tag-standards', coordination:'tag-coordination', navisworks:'tag-navisworks', bim360:'tag-bim360', ifc:'tag-ifc', general:'tag-general' };
 const topicLabel = { revit:'Revit', standards:'BIM Standards', coordination:'Coordination', navisworks:'Navisworks', bim360:'BIM 360', ifc:'IFC', general:'General BIM' };
 
+// Which lessons each plan can access
+const PLAN_ACCESS = {
+  free:    (lesson) => lesson.free,
+  basic:   (lesson) => lesson.cat === 'beginner',
+  pro:     (lesson) => lesson.cat === 'beginner' || lesson.cat === 'intermediate',
+  premium: ()       => true,
+};
+
 export default function DashboardPage() {
-  const router  = useRouter();
+  const router = useRouter();
   const [activePanel, setActivePanel] = useState('overview');
   const [profile,     setProfile]     = useState(null);
-  const [completed,   setCompleted]   = useState(new Set([1, 2]));
+  const [userPlan,    setUserPlan]     = useState(null);
+  const [completed,   setCompleted]   = useState(new Set());
   const [loading,     setLoading]     = useState(true);
 
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.push('/login'); return; }
-      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-      // Merge auth email into profile since profiles table has no email column
-      setProfile({ ...data, email: user.email });
+
+      const { data: profileData } = await supabase
+        .from('profiles').select('*').eq('id', user.id).single();
+      setProfile({ ...profileData, email: user.email });
+
+      const { data: planData } = await supabase
+        .from('user_plans')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+      setUserPlan(planData || null);
 
       const { data: progress } = await supabase
-        .from('lesson_progress').select('lesson_id').eq('user_id', user.id).eq('completed', true);
+        .from('lesson_progress').select('lesson_id')
+        .eq('user_id', user.id).eq('completed', true);
       if (progress) setCompleted(new Set(progress.map(p => p.lesson_id)));
+
       setLoading(false);
     }
     load();
@@ -86,10 +106,26 @@ export default function DashboardPage() {
     router.push('/login');
   }
 
-  const byCategory = (cat) => lessons.filter(l => l.cat === cat);
-  const unlockedCount = lessons.filter(l => l.free || profile?.plan !== 'free').length;
-  const avgScore = quizzes.filter(q => q.taken).reduce((a,q) => a + q.score, 0) /
-                   quizzes.filter(q => q.taken).length || 0;
+  const activePlanName = userPlan?.plan || profile?.plan || 'free';
+  const planExpiry     = userPlan?.expires_at
+    ? new Date(userPlan.expires_at).toLocaleDateString('en-PH', { dateStyle: 'medium' })
+    : null;
+  const planBilling    = userPlan?.billing || 'monthly';
+  const planAmount     = activePlanName === 'pro'     ? (planBilling === 'annual' ? '₱479' : '₱599')
+                       : activePlanName === 'premium' ? (planBilling === 'annual' ? '₱799' : '₱999')
+                       : activePlanName === 'basic'   ? (planBilling === 'annual' ? '₱239' : '₱299')
+                       : 'Free';
+
+  const canAccessLesson = (lesson) => {
+    const checker = PLAN_ACCESS[activePlanName] || PLAN_ACCESS.free;
+    return checker(lesson);
+  };
+
+  const planRank      = { free:0, basic:1, pro:2, premium:3 };
+  const byCategory    = (cat) => lessons.filter(l => l.cat === cat);
+  const unlockedCount = lessons.filter(l => canAccessLesson(l)).length;
+  const avgScore      = quizzes.filter(q => q.taken).reduce((a, q) => a + q.score, 0) /
+                        (quizzes.filter(q => q.taken).length || 1);
 
   if (loading) return (
     <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100vh', background:'#0a0e1a', color:'#8892a4' }}>
@@ -107,7 +143,6 @@ export default function DashboardPage() {
       {/* SIDEBAR */}
       <aside className="sidebar">
         <div className="sidebar-logo">
-          {/* Fixed: shortened to prevent overflow */}
           <div className="logo-text">Dharren <span>BIM</span></div>
           <div className="logo-sub">Student Portal</div>
         </div>
@@ -115,10 +150,10 @@ export default function DashboardPage() {
         <nav className="nav-section">
           <div className="nav-label">Main</div>
           {[
-            { id:'overview',   icon:'🏠', label:'Overview'    },
-            { id:'lessons',    icon:'📚', label:'My Lessons'  },
-            { id:'quizzes',    icon:'📝', label:'Quiz Scores' },
-            { id:'resources',  icon:'📁', label:'Resources'   },
+            { id:'overview',  icon:'🏠', label:'Overview'    },
+            { id:'lessons',   icon:'📚', label:'My Lessons'  },
+            { id:'quizzes',   icon:'📝', label:'Quiz Scores' },
+            { id:'resources', icon:'📁', label:'Resources'   },
           ].map(item => (
             <div
               key={item.id}
@@ -134,8 +169,8 @@ export default function DashboardPage() {
         <nav className="nav-section">
           <div className="nav-label">Account</div>
           {[
-            { id:'billing',  icon:'💳', label:'Plan & Billing'   },
-            { id:'profile',  icon:'⚙️', label:'Profile Settings' },
+            { id:'billing', icon:'💳', label:'Plan & Billing'   },
+            { id:'profile', icon:'⚙️', label:'Profile Settings' },
           ].map(item => (
             <div
               key={item.id}
@@ -153,12 +188,8 @@ export default function DashboardPage() {
             <div className="avatar">{initials}</div>
             <div>
               <div className="user-name">{firstName} {profile?.last_name}</div>
-              {/* Fixed: show Admin in orange for admin email, plan for others */}
-              <div
-                className="user-plan"
-                style={{ color: isAdmin ? '#f59e0b' : undefined }}
-              >
-                {isAdmin ? '⚙ Admin' : `${profile?.plan || 'Free'} Plan`}
+              <div className="user-plan" style={{ color: isAdmin ? '#f59e0b' : undefined }}>
+                {isAdmin ? '⚙ Admin' : `${activePlanName.charAt(0).toUpperCase() + activePlanName.slice(1)} Plan`}
               </div>
             </div>
           </div>
@@ -174,13 +205,27 @@ export default function DashboardPage() {
           <div>
             <h1 className="panel-title">Welcome back, {firstName}! 👋</h1>
             <p className="panel-sub">Here's your BIM learning progress at a glance.</p>
-            <div className="announcement">
-              <span className="ann-icon">📢</span>
-              <div>
-                <div className="ann-title">New Lesson Available</div>
-                <div className="ann-text">BIM in the Philippines has just been published. Check it out in My Lessons!</div>
+
+            {activePlanName === 'free' ? (
+              <div className="announcement" style={{ borderColor:'rgba(37,99,235,0.3)', background:'rgba(37,99,235,0.06)' }}>
+                <span className="ann-icon">🚀</span>
+                <div>
+                  <div className="ann-title" style={{ color:'#60a5fa' }}>Unlock All Lessons</div>
+                  <div className="ann-text">
+                    You're on the Free plan. <Link href="/pricing" style={{ color:'#3b82f6', fontWeight:600 }}>Upgrade to Pro or Premium</Link> to access all 12 BIM lessons.
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="announcement">
+                <span className="ann-icon">📢</span>
+                <div>
+                  <div className="ann-title">New Lesson Available</div>
+                  <div className="ann-text">BIM in the Philippines has just been published. Check it out in My Lessons!</div>
+                </div>
+              </div>
+            )}
+
             <div className="stats-row">
               <div className="stat-card highlight">
                 <div className="stat-label">Lessons Completed</div>
@@ -189,17 +234,19 @@ export default function DashboardPage() {
               </div>
               <div className="stat-card">
                 <div className="stat-label">Current Plan</div>
-                <div className="stat-value" style={{fontSize:'1.1rem',marginTop:'4px'}}>{profile?.plan || 'Free'}</div>
-                <div className="stat-sub">Active</div>
+                <div className="stat-value" style={{ fontSize:'1.1rem', marginTop:'4px', textTransform:'capitalize' }}>
+                  {activePlanName}
+                </div>
+                <div className="stat-sub">{userPlan ? 'Active' : 'Free tier'}</div>
               </div>
               <div className="stat-card">
                 <div className="stat-label">Quiz Average</div>
                 <div className="stat-value">{avgScore ? `${Math.round(avgScore)}%` : '—'}</div>
-                <div className="stat-sub">{quizzes.filter(q=>q.taken).length} quizzes taken</div>
+                <div className="stat-sub">{quizzes.filter(q => q.taken).length} quizzes taken</div>
               </div>
               <div className="stat-card">
                 <div className="stat-label">Resources</div>
-                <div className="stat-value">{resources.filter(r=>!r.locked).length}</div>
+                <div className="stat-value">{resources.filter(r => planRank[activePlanName] >= planRank[r.plan]).length}</div>
                 <div className="stat-sub">files available</div>
               </div>
             </div>
@@ -211,12 +258,23 @@ export default function DashboardPage() {
           <div>
             <h1 className="panel-title">My Lessons</h1>
             <p className="panel-sub">Grouped by level. Click a lesson to mark it complete.</p>
-            {['beginner','intermediate','advanced'].map(cat => (
+
+            <div style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'10px', padding:'.75rem 1rem', marginBottom:'1.5rem', fontSize:'12px', color:'#8892a4', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+              <span>
+                📋 Your plan: <strong style={{ color:'#e8eaf0', textTransform:'capitalize' }}>{activePlanName}</strong>
+                {' · '}{unlockedCount} of {lessons.length} lessons unlocked
+              </span>
+              {activePlanName !== 'premium' && (
+                <Link href="/pricing" style={{ color:'#3b82f6', fontSize:'12px', fontWeight:500 }}>Upgrade for more →</Link>
+              )}
+            </div>
+
+            {['beginner', 'intermediate', 'advanced'].map(cat => (
               <div key={cat} className="cat-group">
                 <div className="cat-header">
                   <span className={`cat-badge cat-${cat}`}>{cat}</span>
                   <span className="cat-title">
-                    {cat==='beginner'?'Foundations':cat==='intermediate'?'Deeper Skills':'Professional Level'}
+                    {cat === 'beginner' ? 'Foundations' : cat === 'intermediate' ? 'Deeper Skills' : 'Professional Level'}
                   </span>
                   <span className="cat-count">
                     {byCategory(cat).filter(l => completed.has(l.id)).length} of {byCategory(cat).length} completed
@@ -224,7 +282,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="lesson-list">
                   {byCategory(cat).map(lesson => {
-                    const isLocked = cat === 'advanced' && profile?.plan === 'free';
+                    const isLocked = !canAccessLesson(lesson);
                     const isDone   = completed.has(lesson.id);
                     return (
                       <div
@@ -240,6 +298,11 @@ export default function DashboardPage() {
                         {lesson.free && <span className="free-tag">FREE</span>}
                         <span className={`lesson-tag ${topicClass[lesson.topic]}`}>{topicLabel[lesson.topic]}</span>
                         {!isLocked && <div className="lesson-arrow">→</div>}
+                        {isLocked && (
+                          <Link href="/pricing" onClick={e => e.stopPropagation()} style={{ fontSize:'11px', color:'#3b82f6', whiteSpace:'nowrap' }}>
+                            Upgrade →
+                          </Link>
+                        )}
                       </div>
                     );
                   })}
@@ -256,7 +319,7 @@ export default function DashboardPage() {
             <p className="panel-sub">Track your performance across all BIM quizzes.</p>
             <div className="quiz-list">
               {quizzes.map((q, i) => (
-                <div key={i} className="quiz-row" style={q.locked ? {opacity:.5} : {}}>
+                <div key={i} className="quiz-row" style={q.locked ? { opacity:.5 } : {}}>
                   <div className="quiz-info">
                     <div className="quiz-title">{q.title}</div>
                     <div className="quiz-sub">{q.lesson} {q.date ? `· Taken ${q.date}` : q.locked ? '· Complete lesson first' : '· Not yet taken'}</div>
@@ -279,21 +342,24 @@ export default function DashboardPage() {
             <h1 className="panel-title">Downloadable Resources</h1>
             <p className="panel-sub">PDFs and reference materials for your BIM journey.</p>
             <div className="resources-grid">
-              {resources.map((r, i) => (
-                <div key={i} className={`resource-card ${r.locked ? 'locked-res' : ''}`}>
-                  <div className={`res-icon ${r.type === 'PDF' ? 'res-pdf' : 'res-doc'}`}>
-                    {r.type === 'PDF' ? '📄' : '📋'}
+              {resources.map((r, i) => {
+                const isLocked = planRank[activePlanName] < planRank[r.plan];
+                return (
+                  <div key={i} className={`resource-card ${isLocked ? 'locked-res' : ''}`}>
+                    <div className={`res-icon ${r.type === 'PDF' ? 'res-pdf' : 'res-doc'}`}>
+                      {r.type === 'PDF' ? '📄' : '📋'}
+                    </div>
+                    <div style={{ flex:1 }}>
+                      <div className="res-title">{r.title}</div>
+                      <div className="res-sub">{r.type} · {r.pages}</div>
+                      <span className={`res-badge ${r.plan === 'free' ? 'res-free' : r.plan === 'premium' ? 'res-premium' : 'res-pro'}`}>
+                        {r.plan.charAt(0).toUpperCase() + r.plan.slice(1)}
+                      </span>
+                    </div>
+                    <div className="res-lock">{isLocked ? '🔒' : '↓'}</div>
                   </div>
-                  <div style={{flex:1}}>
-                    <div className="res-title">{r.title}</div>
-                    <div className="res-sub">{r.type} · {r.pages}</div>
-                    <span className={`res-badge ${r.plan === 'free' ? 'res-free' : r.plan === 'premium' ? 'res-premium' : 'res-pro'}`}>
-                      {r.plan.charAt(0).toUpperCase() + r.plan.slice(1)}
-                    </span>
-                  </div>
-                  <div className="res-lock">{r.locked ? '🔒' : '↓'}</div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -305,17 +371,37 @@ export default function DashboardPage() {
             <p className="panel-sub">Manage your subscription and payment history.</p>
             <div className="plan-card-dash">
               <div className="plan-header">
-                <div className="plan-name-dash">{profile?.plan || 'Free'} Plan</div>
-                <div className="plan-status">Active</div>
+                <div className="plan-name-dash" style={{ textTransform:'capitalize' }}>{activePlanName} Plan</div>
+                <div className="plan-status">{userPlan ? 'Active' : 'Free Tier'}</div>
               </div>
               <div className="plan-details">
-                <div className="plan-detail-item"><div className="detail-label">Billing Cycle</div><div className="detail-val">Monthly</div></div>
-                <div className="plan-detail-item"><div className="detail-label">Amount</div><div className="detail-val">{profile?.plan==='pro'?'₱599':profile?.plan==='premium'?'₱999':'Free'}/mo</div></div>
-                <div className="plan-detail-item"><div className="detail-label">Status</div><div className="detail-val">Active</div></div>
+                <div className="plan-detail-item">
+                  <div className="detail-label">Billing Cycle</div>
+                  <div className="detail-val" style={{ textTransform:'capitalize' }}>{userPlan ? planBilling : '—'}</div>
+                </div>
+                <div className="plan-detail-item">
+                  <div className="detail-label">Amount</div>
+                  <div className="detail-val">{planAmount}{userPlan ? '/mo' : ''}</div>
+                </div>
+                <div className="plan-detail-item">
+                  <div className="detail-label">Status</div>
+                  <div className="detail-val">{userPlan?.status ? userPlan.status.charAt(0).toUpperCase() + userPlan.status.slice(1) : 'Free'}</div>
+                </div>
+                {planExpiry && (
+                  <div className="plan-detail-item">
+                    <div className="detail-label">Renews / Expires</div>
+                    <div className="detail-val">{planExpiry}</div>
+                  </div>
+                )}
               </div>
-              <Link href="/pricing" className="upgrade-btn" style={{textDecoration:'none',display:'inline-block'}}>
-                Upgrade Plan →
-              </Link>
+              {activePlanName !== 'premium' && (
+                <Link href="/pricing" className="upgrade-btn" style={{ textDecoration:'none', display:'inline-block' }}>
+                  {activePlanName === 'free' ? 'Get a Plan →' : 'Upgrade Plan →'}
+                </Link>
+              )}
+              {activePlanName === 'premium' && (
+                <div style={{ fontSize:'13px', color:'#4ade80', marginTop:'1rem' }}>✓ You have full access to all content.</div>
+              )}
             </div>
           </div>
         )}
@@ -335,7 +421,7 @@ export default function DashboardPage() {
                 <button className="save-btn">Save Changes</button>
               </div>
               <div>
-                <div className="profile-card" style={{marginBottom:'1rem'}}>
+                <div className="profile-card" style={{ marginBottom:'1rem' }}>
                   <div className="profile-card-title">Change Password</div>
                   <div className="form-group"><label>CURRENT PASSWORD</label><input type="password" placeholder="••••••••"/></div>
                   <div className="form-group"><label>NEW PASSWORD</label><input type="password" placeholder="Min. 8 characters"/></div>
@@ -343,8 +429,8 @@ export default function DashboardPage() {
                   <button className="save-btn">Update Password</button>
                 </div>
                 <div className="profile-card">
-                  <div className="profile-card-title" style={{color:'#f87171'}}>Danger Zone</div>
-                  <p style={{fontSize:'12px',color:'#8892a4',marginBottom:'1rem',lineHeight:'1.65'}}>Deleting your account is permanent and cannot be undone.</p>
+                  <div className="profile-card-title" style={{ color:'#f87171' }}>Danger Zone</div>
+                  <p style={{ fontSize:'12px', color:'#8892a4', marginBottom:'1rem', lineHeight:'1.65' }}>Deleting your account is permanent and cannot be undone.</p>
                   <button className="danger-btn">Delete My Account</button>
                 </div>
               </div>
