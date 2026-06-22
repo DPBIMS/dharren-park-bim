@@ -4,9 +4,13 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 
+const ADMIN_EMAILS = ['dharrenpark2024@gmail.com'];
+
 export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled,   setScrolled]   = useState(false);
+  const [menuOpen,   setMenuOpen]   = useState(false);
+  const [userEmail,  setUserEmail]  = useState('');
+  const [authReady,  setAuthReady]  = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -15,22 +19,31 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const ADMIN_EMAILS = ['dharrenpark2024@gmail.com'];
-const [userEmail, setUserEmail] = useState('');
+  useEffect(() => {
+    // Get current user on mount
+    supabase.auth.getUser().then(({ data }) => {
+      setUserEmail(data?.user?.email || '');
+      setAuthReady(true);
+    });
 
-useEffect(() => {
-  supabase.auth.getUser().then(({ data }) => {
-    setUserEmail(data?.user?.email || '');
-  });
-}, []);
+    // Also listen for auth changes (login/logout)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserEmail(session?.user?.email || '');
+      setAuthReady(true);
+    });
 
-const links = [
-  { href: '/', label: 'Home' },
-  { href: '/lessons', label: 'Lessons' },
-  { href: '/pricing', label: 'Pricing' },
-  { href: '/dashboard', label: 'Dashboard' },
-  ...(ADMIN_EMAILS.includes(userEmail) ? [{ href: '/admin', label: '⚙ Admin' }] : []),
-];
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const isAdmin = authReady && ADMIN_EMAILS.includes(userEmail);
+
+  const links = [
+    { href: '/',          label: 'Home'      },
+    { href: '/lessons',   label: 'Lessons'   },
+    { href: '/pricing',   label: 'Pricing'   },
+    { href: '/dashboard', label: 'Dashboard' },
+    ...(isAdmin ? [{ href: '/admin', label: '⚙ Admin' }] : []),
+  ];
 
   return (
     <nav style={{
