@@ -23,25 +23,19 @@ const lessons = [
 ];
 
 const resources = [
-  { title:'BIM Glossary & Terms',      type:'PDF',  pages:'12 pages', plan:'free',    },
-  { title:'LOD Reference Sheet',       type:'PDF',  pages:'4 pages',  plan:'pro',     },
-  { title:'BEP Template',              type:'DOCX', pages:'Editable', plan:'pro',     },
-  { title:'Clash Detection Checklist', type:'PDF',  pages:'6 pages',  plan:'pro',     },
-  { title:'4D BIM Workflow Guide',     type:'PDF',  pages:'18 pages', plan:'premium', },
-  { title:'PH BIM Standards Summary',  type:'PDF',  pages:'10 pages', plan:'premium', },
-];
-
-const quizzes = [
-  { title:'BIM Fundamentals Quiz',    lesson:'Lesson 01', date:'Jun 1, 2026', score:90,   taken:true  },
-  { title:'BIM vs CAD Assessment',    lesson:'Lesson 02', date:'Jun 3, 2026', score:74,   taken:true  },
-  { title:'Revit Essentials Quiz',    lesson:'Lesson 03', date:null,          score:null, taken:false },
-  { title:'LOD Standards Assessment', lesson:'Lesson 04', date:null,          score:null, taken:false, locked:true },
+  { title:'BIM Glossary & Terms',      type:'PDF',  pages:'12 pages', plan:'free'    },
+  { title:'LOD Reference Sheet',       type:'PDF',  pages:'4 pages',  plan:'pro'     },
+  { title:'BEP Template',              type:'DOCX', pages:'Editable', plan:'pro'     },
+  { title:'Clash Detection Checklist', type:'PDF',  pages:'6 pages',  plan:'pro'     },
+  { title:'4D BIM Workflow Guide',     type:'PDF',  pages:'18 pages', plan:'premium' },
+  { title:'PH BIM Standards Summary',  type:'PDF',  pages:'10 pages', plan:'premium' },
 ];
 
 const topicClass = { revit:'tag-revit', standards:'tag-standards', coordination:'tag-coordination', navisworks:'tag-navisworks', bim360:'tag-bim360', ifc:'tag-ifc', general:'tag-general' };
 const topicLabel = { revit:'Revit', standards:'BIM Standards', coordination:'Coordination', navisworks:'Navisworks', bim360:'BIM 360', ifc:'IFC', general:'General BIM' };
 
-// Which lessons each plan can access
+const planRank = { free:0, basic:1, pro:2, premium:3 };
+
 const PLAN_ACCESS = {
   free:    (lesson) => lesson.free,
   basic:   (lesson) => lesson.cat === 'beginner',
@@ -51,11 +45,12 @@ const PLAN_ACCESS = {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [activePanel, setActivePanel] = useState('overview');
-  const [profile,     setProfile]     = useState(null);
-  const [userPlan,    setUserPlan]     = useState(null);
-  const [completed,   setCompleted]   = useState(new Set());
-  const [loading,     setLoading]     = useState(true);
+  const [activePanel,  setActivePanel]  = useState('overview');
+  const [profile,      setProfile]      = useState(null);
+  const [userPlan,     setUserPlan]     = useState(null);
+  const [completed,    setCompleted]    = useState(new Set());
+  const [quizAttempts, setQuizAttempts] = useState([]);
+  const [loading,      setLoading]      = useState(true);
 
   useEffect(() => {
     async function load() {
@@ -67,17 +62,20 @@ export default function DashboardPage() {
       setProfile({ ...profileData, email: user.email });
 
       const { data: planData } = await supabase
-        .from('user_plans')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .single();
+        .from('user_plans').select('*')
+        .eq('user_id', user.id).eq('status', 'active').single();
       setUserPlan(planData || null);
 
       const { data: progress } = await supabase
         .from('lesson_progress').select('lesson_id')
         .eq('user_id', user.id).eq('completed', true);
       if (progress) setCompleted(new Set(progress.map(p => p.lesson_id)));
+
+      const { data: attempts } = await supabase
+        .from('quiz_attempts').select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      if (attempts) setQuizAttempts(attempts);
 
       setLoading(false);
     }
@@ -106,32 +104,61 @@ export default function DashboardPage() {
     router.push('/login');
   }
 
-  const activePlanName = userPlan?.plan || profile?.plan || 'free';
-  const planExpiry     = userPlan?.expires_at
-    ? new Date(userPlan.expires_at).toLocaleDateString('en-PH', { dateStyle: 'medium' })
-    : null;
-  const planBilling    = userPlan?.billing || 'monthly';
-  const planAmount     = activePlanName === 'pro'     ? (planBilling === 'annual' ? '₱479' : '₱599')
-                       : activePlanName === 'premium' ? (planBilling === 'annual' ? '₱799' : '₱999')
-                       : activePlanName === 'basic'   ? (planBilling === 'annual' ? '₱239' : '₱299')
-                       : 'Free';
-
-  const canAccessLesson = (lesson) => {
-    const checker = PLAN_ACCESS[activePlanName] || PLAN_ACCESS.free;
-    return checker(lesson);
-  };
-
-  const planRank      = { free:0, basic:1, pro:2, premium:3 };
-  const byCategory    = (cat) => lessons.filter(l => l.cat === cat);
-  const unlockedCount = lessons.filter(l => canAccessLesson(l)).length;
-  const avgScore      = quizzes.filter(q => q.taken).reduce((a, q) => a + q.score, 0) /
-                        (quizzes.filter(q => q.taken).length || 1);
-
   if (loading) return (
     <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100vh', background:'#0a0e1a', color:'#8892a4' }}>
       Loading your dashboard...
     </div>
   );
+
+  // ── Derived values — all defined AFTER loading, before any JSX ──
+  const activePlanName = userPlan?.plan || profile?.plan || 'free';
+  const planBilling    = userPlan?.billing || 'monthly';
+  const planExpiry     = userPlan?.expires_at
+    ? new Date(userPlan.expires_at).toLocaleDateString('en-PH', { dateStyle: 'medium' })
+    : null;
+  const planAmount     = activePlanName === 'pro'     ? (planBilling === 'annual' ? '₱479' : '₱599')
+                       : activePlanName === 'premium' ? (planBilling === 'annual' ? '₱799' : '₱999')
+                       : activePlanName === 'basic'   ? (planBilling === 'annual' ? '₱239' : '₱299')
+                       : 'Free';
+
+  // canAccessLesson defined here — after activePlanName is set
+  function canAccessLesson(lesson) {
+    const checker = PLAN_ACCESS[activePlanName] || PLAN_ACCESS.free;
+    return checker(lesson);
+  }
+
+  const byCategory    = (cat) => lessons.filter(l => l.cat === cat);
+  const unlockedCount = lessons.filter(l => canAccessLesson(l)).length;
+
+  // Best score per lesson
+  const bestScoreByLesson = quizAttempts.reduce((acc, attempt) => {
+    const lid = attempt.lesson_id;
+    if (!acc[lid] || attempt.score > acc[lid].score) acc[lid] = attempt;
+    return acc;
+  }, {});
+
+  // Quiz rows with real data
+  const quizRows = lessons.map(lesson => {
+    const best = bestScoreByLesson[lesson.id];
+    return {
+      lessonId:    lesson.id,
+      lessonNum:   lesson.num,
+      title:       `Lesson ${lesson.num} Quiz`,
+      lessonTitle: lesson.title,
+      taken:       !!best,
+      score:       best?.score ?? null,
+      passed:      best?.passed ?? false,
+      date:        best ? new Date(best.created_at).toLocaleDateString('en-PH', { dateStyle: 'medium' }) : null,
+      attempts:    quizAttempts.filter(a => a.lesson_id === lesson.id).length,
+      locked:      !canAccessLesson(lesson),
+    };
+  });
+
+  const takenQuizzes = quizRows.filter(q => q.taken);
+  const avgScore     = takenQuizzes.length
+    ? Math.round(takenQuizzes.reduce((a, q) => a + q.score, 0) / takenQuizzes.length)
+    : null;
+  const passedCount  = takenQuizzes.filter(q => q.passed).length;
 
   const firstName = profile?.first_name || 'Student';
   const initials  = (firstName[0] + (profile?.last_name?.[0] || '')).toUpperCase();
@@ -155,13 +182,8 @@ export default function DashboardPage() {
             { id:'quizzes',   icon:'📝', label:'Quiz Scores' },
             { id:'resources', icon:'📁', label:'Resources'   },
           ].map(item => (
-            <div
-              key={item.id}
-              className={`nav-item ${activePanel === item.id ? 'active' : ''}`}
-              onClick={() => setActivePanel(item.id)}
-            >
-              <span className="nav-icon">{item.icon}</span>
-              {item.label}
+            <div key={item.id} className={`nav-item ${activePanel === item.id ? 'active' : ''}`} onClick={() => setActivePanel(item.id)}>
+              <span className="nav-icon">{item.icon}</span>{item.label}
             </div>
           ))}
         </nav>
@@ -172,13 +194,8 @@ export default function DashboardPage() {
             { id:'billing', icon:'💳', label:'Plan & Billing'   },
             { id:'profile', icon:'⚙️', label:'Profile Settings' },
           ].map(item => (
-            <div
-              key={item.id}
-              className={`nav-item ${activePanel === item.id ? 'active' : ''}`}
-              onClick={() => setActivePanel(item.id)}
-            >
-              <span className="nav-icon">{item.icon}</span>
-              {item.label}
+            <div key={item.id} className={`nav-item ${activePanel === item.id ? 'active' : ''}`} onClick={() => setActivePanel(item.id)}>
+              <span className="nav-icon">{item.icon}</span>{item.label}
             </div>
           ))}
         </nav>
@@ -211,9 +228,7 @@ export default function DashboardPage() {
                 <span className="ann-icon">🚀</span>
                 <div>
                   <div className="ann-title" style={{ color:'#60a5fa' }}>Unlock All Lessons</div>
-                  <div className="ann-text">
-                    You're on the Free plan. <Link href="/pricing" style={{ color:'#3b82f6', fontWeight:600 }}>Upgrade to Pro or Premium</Link> to access all 12 BIM lessons.
-                  </div>
+                  <div className="ann-text">You're on the Free plan. <Link href="/pricing" style={{ color:'#3b82f6', fontWeight:600 }}>Upgrade to Pro or Premium</Link> to access all 12 BIM lessons.</div>
                 </div>
               </div>
             ) : (
@@ -234,15 +249,13 @@ export default function DashboardPage() {
               </div>
               <div className="stat-card">
                 <div className="stat-label">Current Plan</div>
-                <div className="stat-value" style={{ fontSize:'1.1rem', marginTop:'4px', textTransform:'capitalize' }}>
-                  {activePlanName}
-                </div>
+                <div className="stat-value" style={{ fontSize:'1.1rem', marginTop:'4px', textTransform:'capitalize' }}>{activePlanName}</div>
                 <div className="stat-sub">{userPlan ? 'Active' : 'Free tier'}</div>
               </div>
               <div className="stat-card">
                 <div className="stat-label">Quiz Average</div>
-                <div className="stat-value">{avgScore ? `${Math.round(avgScore)}%` : '—'}</div>
-                <div className="stat-sub">{quizzes.filter(q => q.taken).length} quizzes taken</div>
+                <div className="stat-value">{avgScore !== null ? `${avgScore}%` : '—'}</div>
+                <div className="stat-sub">{takenQuizzes.length} quiz{takenQuizzes.length !== 1 ? 'zes' : ''} taken · {passedCount} passed</div>
               </div>
               <div className="stat-card">
                 <div className="stat-label">Resources</div>
@@ -260,36 +273,23 @@ export default function DashboardPage() {
             <p className="panel-sub">Grouped by level. Click a lesson to mark it complete.</p>
 
             <div style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'10px', padding:'.75rem 1rem', marginBottom:'1.5rem', fontSize:'12px', color:'#8892a4', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-              <span>
-                📋 Your plan: <strong style={{ color:'#e8eaf0', textTransform:'capitalize' }}>{activePlanName}</strong>
-                {' · '}{unlockedCount} of {lessons.length} lessons unlocked
-              </span>
-              {activePlanName !== 'premium' && (
-                <Link href="/pricing" style={{ color:'#3b82f6', fontSize:'12px', fontWeight:500 }}>Upgrade for more →</Link>
-              )}
+              <span>📋 Your plan: <strong style={{ color:'#e8eaf0', textTransform:'capitalize' }}>{activePlanName}</strong> · {unlockedCount} of {lessons.length} lessons unlocked</span>
+              {activePlanName !== 'premium' && <Link href="/pricing" style={{ color:'#3b82f6', fontSize:'12px', fontWeight:500 }}>Upgrade for more →</Link>}
             </div>
 
-            {['beginner', 'intermediate', 'advanced'].map(cat => (
+            {['beginner','intermediate','advanced'].map(cat => (
               <div key={cat} className="cat-group">
                 <div className="cat-header">
                   <span className={`cat-badge cat-${cat}`}>{cat}</span>
-                  <span className="cat-title">
-                    {cat === 'beginner' ? 'Foundations' : cat === 'intermediate' ? 'Deeper Skills' : 'Professional Level'}
-                  </span>
-                  <span className="cat-count">
-                    {byCategory(cat).filter(l => completed.has(l.id)).length} of {byCategory(cat).length} completed
-                  </span>
+                  <span className="cat-title">{cat==='beginner'?'Foundations':cat==='intermediate'?'Deeper Skills':'Professional Level'}</span>
+                  <span className="cat-count">{byCategory(cat).filter(l => completed.has(l.id)).length} of {byCategory(cat).length} completed</span>
                 </div>
                 <div className="lesson-list">
                   {byCategory(cat).map(lesson => {
                     const isLocked = !canAccessLesson(lesson);
                     const isDone   = completed.has(lesson.id);
                     return (
-                      <div
-                        key={lesson.id}
-                        className={`lesson-row ${isLocked ? 'locked-row' : ''}`}
-                        onClick={() => !isLocked && toggleLesson(lesson.id)}
-                      >
+                      <div key={lesson.id} className={`lesson-row ${isLocked ? 'locked-row' : ''}`} onClick={() => !isLocked && toggleLesson(lesson.id)}>
                         <div className={`lesson-status ${isLocked ? 'status-lock' : isDone ? 'status-done' : 'status-not'}`}>
                           {isLocked ? '🔒' : isDone ? '✓' : ''}
                         </div>
@@ -316,22 +316,54 @@ export default function DashboardPage() {
         {activePanel === 'quizzes' && (
           <div>
             <h1 className="panel-title">Quiz Scores</h1>
-            <p className="panel-sub">Track your performance across all BIM quizzes.</p>
-            <div className="quiz-list">
-              {quizzes.map((q, i) => (
-                <div key={i} className="quiz-row" style={q.locked ? { opacity:.5 } : {}}>
-                  <div className="quiz-info">
-                    <div className="quiz-title">{q.title}</div>
-                    <div className="quiz-sub">{q.lesson} {q.date ? `· Taken ${q.date}` : q.locked ? '· Complete lesson first' : '· Not yet taken'}</div>
-                  </div>
-                  <div className={`quiz-score ${q.score >= 85 ? 'score-pass' : q.score ? 'score-avg' : 'score-na'}`}>
-                    {q.score ? `${q.score}%` : '—'}
-                  </div>
-                  <button className="quiz-btn" disabled={q.locked}>
-                    {q.locked ? 'Locked' : q.taken ? 'Retake' : 'Start'}
-                  </button>
+            <p className="panel-sub">Your performance across all BIM quizzes — live from your attempts.</p>
+
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'1rem', marginBottom:'1.5rem' }}>
+              {[
+                { label:'Quizzes Taken',  value: takenQuizzes.length,                   sub: `of ${lessons.length} total`               },
+                { label:'Average Score',  value: avgScore !== null ? `${avgScore}%`:'—', sub: 'across all attempts'                      },
+                { label:'Quizzes Passed', value: passedCount,                            sub: `${takenQuizzes.length - passedCount} to retry` },
+              ].map(s => (
+                <div key={s.label} style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'12px', padding:'1rem 1.25rem' }}>
+                  <div style={{ fontSize:'10px', fontWeight:600, letterSpacing:'1px', color:'#8892a4', marginBottom:'.3rem' }}>{s.label.toUpperCase()}</div>
+                  <div style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:'1.5rem' }}>{s.value}</div>
+                  <div style={{ fontSize:'11px', color:'#8892a4', marginTop:'2px' }}>{s.sub}</div>
                 </div>
               ))}
+            </div>
+
+            <div className="quiz-list">
+              {quizRows.map(q => {
+                const scoreColor = q.score >= 85 ? '#4ade80' : q.score >= 60 ? '#f59e0b' : q.score !== null ? '#f87171' : '#8892a4';
+                return (
+                  <div key={q.lessonId} className="quiz-row" style={{ opacity: q.locked ? .45 : 1 }}>
+                    <div className="quiz-info">
+                      <div className="quiz-title">
+                        Lesson {q.lessonNum} — <span style={{ color:'#8892a4', fontWeight:400 }}>{q.lessonTitle}</span>
+                      </div>
+                      <div className="quiz-sub">
+                        {q.locked
+                          ? '🔒 Upgrade to unlock this quiz'
+                          : q.taken
+                            ? `✓ Last taken ${q.date} · ${q.attempts} attempt${q.attempts !== 1 ? 's' : ''} · ${q.passed ? '✅ Passed' : '❌ Not passed yet'}`
+                            : '· Not yet taken'}
+                      </div>
+                    </div>
+                    <div style={{ color: scoreColor, background: q.score !== null ? `${scoreColor}18` : 'transparent', border: q.score !== null ? `1px solid ${scoreColor}33` : 'none', borderRadius:'8px', padding:'4px 12px', fontSize:'14px', fontWeight:700, whiteSpace:'nowrap' }}>
+                      {q.score !== null ? `${q.score}%` : '—'}
+                    </div>
+                    {!q.locked ? (
+                      <Link href={`/quizzes/${q.lessonId}`} className="quiz-btn" style={{ textDecoration:'none', textAlign:'center' }}>
+                        {q.taken ? 'Retake' : 'Start'}
+                      </Link>
+                    ) : (
+                      <Link href="/pricing" className="quiz-btn" style={{ textDecoration:'none', textAlign:'center', opacity:.6 }}>
+                        Unlock
+                      </Link>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -375,24 +407,10 @@ export default function DashboardPage() {
                 <div className="plan-status">{userPlan ? 'Active' : 'Free Tier'}</div>
               </div>
               <div className="plan-details">
-                <div className="plan-detail-item">
-                  <div className="detail-label">Billing Cycle</div>
-                  <div className="detail-val" style={{ textTransform:'capitalize' }}>{userPlan ? planBilling : '—'}</div>
-                </div>
-                <div className="plan-detail-item">
-                  <div className="detail-label">Amount</div>
-                  <div className="detail-val">{planAmount}{userPlan ? '/mo' : ''}</div>
-                </div>
-                <div className="plan-detail-item">
-                  <div className="detail-label">Status</div>
-                  <div className="detail-val">{userPlan?.status ? userPlan.status.charAt(0).toUpperCase() + userPlan.status.slice(1) : 'Free'}</div>
-                </div>
-                {planExpiry && (
-                  <div className="plan-detail-item">
-                    <div className="detail-label">Renews / Expires</div>
-                    <div className="detail-val">{planExpiry}</div>
-                  </div>
-                )}
+                <div className="plan-detail-item"><div className="detail-label">Billing Cycle</div><div className="detail-val" style={{ textTransform:'capitalize' }}>{userPlan ? planBilling : '—'}</div></div>
+                <div className="plan-detail-item"><div className="detail-label">Amount</div><div className="detail-val">{planAmount}{userPlan ? '/mo' : ''}</div></div>
+                <div className="plan-detail-item"><div className="detail-label">Status</div><div className="detail-val">{userPlan?.status ? userPlan.status.charAt(0).toUpperCase() + userPlan.status.slice(1) : 'Free'}</div></div>
+                {planExpiry && <div className="plan-detail-item"><div className="detail-label">Expires</div><div className="detail-val">{planExpiry}</div></div>}
               </div>
               {activePlanName !== 'premium' && (
                 <Link href="/pricing" className="upgrade-btn" style={{ textDecoration:'none', display:'inline-block' }}>
