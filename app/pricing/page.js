@@ -42,47 +42,69 @@ export default function PricingPage() {
   const plan = plans.find(p => p.name === selectedPlan);
   const price = annual ? plan.annual : plan.monthly;
 
-  const handleSubmit = async () => {
-    if (!email || !ref) { setError('Please enter your email and reference number.'); return; }
-    if (!email.includes('@')) { setError('Enter a valid email address.'); return; }
-    setError(''); setLoading(true);
+// Replace your existing handleSubmit function in app/pricing/page.js with this:
 
-    try {
-      let userId = user?.id;
+const handleSubmit = async () => {
+  if (!email || !ref) { setError('Please enter your email and reference number.'); return; }
+  if (!email.includes('@')) { setError('Enter a valid email address.'); return; }
+  setError(''); setLoading(true);
 
-      if (!userId) {
-        const { data } = await supabase.auth.getUser();
-        userId = data?.user?.id;
-      }
-
-      if (!userId) {
-        setError('Please log in first before submitting payment.');
-        setLoading(false);
-        return;
-      }
-
-      const { error: insertError } = await supabase
-        .from('payment_submissions')
-        .insert({
-          user_id: userId,
-          email,
-          full_name: fullName,
-          plan: selectedPlan,
-          billing: annual ? 'annual' : 'monthly',
-          amount: price,
-          payment_method: selectedMethod,
-          reference_number: ref.trim(),
-          status: 'pending',
-        });
-
-      if (insertError) throw insertError;
-      setSubmitted(true);
-
-    } catch (err) {
-      setError(err.message || 'Something went wrong. Please try again.');
+  try {
+    let userId = user?.id;
+    if (!userId) {
+      const { data } = await supabase.auth.getUser();
+      userId = data?.user?.id;
     }
-    setLoading(false);
-  };
+    if (!userId) {
+      setError('Please log in first before submitting payment.');
+      setLoading(false);
+      return;
+    }
+
+    // 1. Save payment submission to Supabase
+    const { error: insertError } = await supabase
+      .from('payment_submissions')
+      .insert({
+        user_id:          userId,
+        email,
+        full_name:        fullName,
+        plan:             selectedPlan,
+        billing:          annual ? 'annual' : 'monthly',
+        amount:           price,
+        payment_method:   selectedMethod,
+        reference_number: ref.trim(),
+        status:           'pending',
+      });
+
+    if (insertError) throw insertError;
+
+    // 2. Notify admin via email (non-blocking — don't fail if this errors)
+    try {
+      await fetch('/api/notify-admin', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          studentName:  fullName  || 'Unknown',
+          studentEmail: email,
+          plan:         selectedPlan,
+          billing:      annual ? 'annual' : 'monthly',
+          amount:       price,
+          method:       selectedMethod,
+          reference:    ref.trim(),
+        }),
+      });
+    } catch (notifyErr) {
+      // Don't block submission if email fails
+      console.error('Admin notify failed:', notifyErr);
+    }
+
+    setSubmitted(true);
+
+  } catch (err) {
+    setError(err.message || 'Something went wrong. Please try again.');
+  }
+  setLoading(false);
+};
 
   const inp = { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '9px 12px', color: '#e8eaf0', fontSize: '13px', fontFamily: "'DM Sans',sans-serif", outline: 'none', width: '100%' };
 
