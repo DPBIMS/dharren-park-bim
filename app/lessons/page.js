@@ -1,6 +1,7 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
 import lessons from '@/lib/lessonsData';
 
 const tagStyle = {
@@ -22,18 +23,58 @@ const catColor = {
   advanced:     { bg:'rgba(239,68,68,0.1)',  c:'#f87171' },
 };
 
+// Same plan access rules as dashboard
+const PLAN_ACCESS = {
+  free:    (lesson) => lesson.free,
+  basic:   (lesson) => lesson.cat === 'beginner',
+  pro:     (lesson) => lesson.cat === 'beginner' || lesson.cat === 'intermediate',
+  premium: ()       => true,
+};
+
 export default function LessonsPage() {
-  const [activeCat,   setActiveCat]   = useState('all');
-  const [activeTopic, setActiveTopic] = useState('all');
-  const [search,      setSearch]      = useState('');
+  const [activeCat,    setActiveCat]    = useState('all');
+  const [activeTopic,  setActiveTopic]  = useState('all');
+  const [search,       setSearch]       = useState('');
+  const [activePlan,   setActivePlan]   = useState('free');
+  const [planLoading,  setPlanLoading]  = useState(true);
+
+  useEffect(() => {
+    async function loadPlan() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setPlanLoading(false); return; }
+
+      // Check user_plans table first (paid plan)
+      const { data: planData } = await supabase
+        .from('user_plans').select('plan')
+        .eq('user_id', user.id).eq('status', 'active').single();
+
+      if (planData?.plan) {
+        setActivePlan(planData.plan);
+      } else {
+        // Fall back to profiles.plan
+        const { data: profile } = await supabase
+          .from('profiles').select('plan').eq('id', user.id).single();
+        setActivePlan(profile?.plan || 'free');
+      }
+      setPlanLoading(false);
+    }
+    loadPlan();
+  }, []);
+
+  function canAccess(lesson) {
+    const checker = PLAN_ACCESS[activePlan] || PLAN_ACCESS.free;
+    return checker(lesson);
+  }
 
   const filtered = lessons.filter(l => {
-    const matchCat   = activeCat   === 'all' || l.cat   === activeCat;
-    const matchTopic = activeTopic === 'all' || l.topic === activeTopic;
+    const matchCat    = activeCat   === 'all' || l.cat   === activeCat;
+    const matchTopic  = activeTopic === 'all' || l.topic === activeTopic;
     const matchSearch = l.title.toLowerCase().includes(search.toLowerCase()) ||
                         l.desc.toLowerCase().includes(search.toLowerCase());
     return matchCat && matchTopic && matchSearch;
   });
+
+  const unlockedCount = lessons.filter(l => canAccess(l)).length;
 
   return (
     <main style={{ background:'#0a0e1a', color:'#e8eaf0', minHeight:'100vh', paddingTop:'80px', fontFamily:"'DM Sans',sans-serif" }}>
@@ -45,6 +86,23 @@ export default function LessonsPage() {
           <h1 style={{ fontFamily:"'Syne',sans-serif", fontSize:'2.2rem', fontWeight:800, letterSpacing:'-0.5px', marginBottom:'.5rem' }}>BIM Lessons</h1>
           <p style={{ color:'#8892a4', fontSize:'15px' }}>Browse all lessons. Subscribe to unlock full content.</p>
         </div>
+
+        {/* Plan access banner */}
+        {!planLoading && activePlan !== 'free' && (
+          <div style={{ background:'rgba(37,99,235,0.06)', border:'1px solid rgba(37,99,235,0.2)', borderRadius:'10px', padding:'.75rem 1.25rem', marginBottom:'1.5rem', fontSize:'13px', color:'#93c5fd', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <span>
+              ✓ Logged in as <strong style={{ textTransform:'capitalize' }}>{activePlan} Plan</strong> — {unlockedCount} of {lessons.length} lessons unlocked
+            </span>
+            <Link href="/dashboard" style={{ color:'#3b82f6', fontSize:'12px', fontWeight:500, textDecoration:'none' }}>Go to Dashboard →</Link>
+          </div>
+        )}
+
+        {!planLoading && activePlan === 'free' && (
+          <div style={{ background:'rgba(245,158,11,0.06)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:'10px', padding:'.75rem 1.25rem', marginBottom:'1.5rem', fontSize:'13px', color:'#fbbf24', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <span>🔒 You're on the Free plan — only free lessons are accessible.</span>
+            <Link href="/pricing" style={{ color:'#f59e0b', fontSize:'12px', fontWeight:600, textDecoration:'none' }}>Upgrade Now →</Link>
+          </div>
+        )}
 
         {/* Filter Bar */}
         <div style={{ display:'flex', flexWrap:'wrap', gap:'1rem', marginBottom:'1.5rem', alignItems:'center', justifyContent:'space-between' }}>
@@ -102,10 +160,11 @@ export default function LessonsPage() {
         ) : (
           <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'1.25rem' }}>
             {filtered.map(l => {
-              const ts = tagStyle[l.topic];
-              const cs = catColor[l.cat];
+              const ts        = tagStyle[l.topic];
+              const cs        = catColor[l.cat];
+              const accessible = canAccess(l);
               return (
-                <div key={l.id} style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'14px', overflow:'hidden', display:'flex', flexDirection:'column' }}>
+                <div key={l.id} style={{ background:'rgba(255,255,255,0.04)', border:`1px solid ${accessible ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.05)'}`, borderRadius:'14px', overflow:'hidden', display:'flex', flexDirection:'column', opacity: accessible ? 1 : 0.75 }}>
                   <div style={{ padding:'1.25rem 1.25rem .75rem', flex:1 }}>
                     <div style={{ display:'flex', alignItems:'center', gap:'.4rem', marginBottom:'.75rem', flexWrap:'wrap' }}>
                       <span style={{ fontSize:'11px', fontWeight:500, padding:'3px 10px', borderRadius:'5px', background:ts.bg, color:ts.color, border:`1px solid ${ts.border}` }}>{tagLabel[l.topic]}</span>
@@ -114,17 +173,24 @@ export default function LessonsPage() {
                     </div>
                     <div style={{ fontSize:'11px', color:'#8892a4', marginBottom:'.4rem' }}>Lesson {l.num}</div>
                     <div style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:'15px', lineHeight:'1.35', marginBottom:'.5rem' }}>{l.title}</div>
-                    {l.free && <div style={{ fontSize:'13px', color:'#8892a4', lineHeight:'1.65' }}>{l.desc}</div>}
+                    {accessible && <div style={{ fontSize:'13px', color:'#8892a4', lineHeight:'1.65' }}>{l.desc}</div>}
                   </div>
-                  {l.free ? (
+
+                  {/* Footer — accessible or locked */}
+                  {accessible ? (
                     <Link href={`/lessons/${l.id}`} style={{ padding:'.75rem 1.25rem', borderTop:'1px solid rgba(255,255,255,0.08)', display:'flex', alignItems:'center', justifyContent:'space-between', textDecoration:'none' }}>
                       <span style={{ fontSize:'12px', color:'#3b82f6', fontWeight:500 }}>Read lesson</span>
                       <span style={{ fontSize:'14px', color:'#8892a4' }}>→</span>
                     </Link>
                   ) : (
-                    <div style={{ padding:'.75rem 1.25rem', borderTop:'1px solid rgba(255,255,255,0.08)', display:'flex', alignItems:'center', gap:'.5rem' }}>
+                    <div style={{ padding:'.75rem 1.25rem', borderTop:'1px solid rgba(255,255,255,0.06)', display:'flex', alignItems:'center', gap:'.5rem' }}>
                       <span>🔒</span>
-                      <span style={{ fontSize:'12px', color:'#8892a4' }}>Subscribe to unlock — <Link href="/pricing" style={{ color:'#3b82f6', textDecoration:'none' }}>View Plans</Link></span>
+                      <span style={{ fontSize:'12px', color:'#8892a4' }}>
+                        {activePlan === 'free'
+                          ? <>Subscribe to unlock — <Link href="/pricing" style={{ color:'#3b82f6', textDecoration:'none' }}>View Plans</Link></>
+                          : <>Upgrade to unlock — <Link href="/pricing" style={{ color:'#3b82f6', textDecoration:'none' }}>View Plans</Link></>
+                        }
+                      </span>
                     </div>
                   )}
                 </div>
