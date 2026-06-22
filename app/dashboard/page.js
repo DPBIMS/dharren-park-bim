@@ -5,6 +5,8 @@ import Link                    from 'next/link';
 import { supabase }            from '@/lib/supabase';
 import './dashboard.css';
 
+const ADMIN_EMAILS = ['dharrenpark2024@gmail.com'];
+
 const lessons = [
   { id:1,  num:'01', title:'What is BIM? A Complete Introduction',       cat:'beginner',     topic:'general',      free:true  },
   { id:2,  num:'02', title:'BIM vs CAD: Key Differences Explained',       cat:'beginner',     topic:'general',      free:true  },
@@ -30,9 +32,9 @@ const resources = [
 ];
 
 const quizzes = [
-  { title:'BIM Fundamentals Quiz',  lesson:'Lesson 01', date:'Jun 1, 2026',  score:90,  taken:true  },
-  { title:'BIM vs CAD Assessment',  lesson:'Lesson 02', date:'Jun 3, 2026',  score:74,  taken:true  },
-  { title:'Revit Essentials Quiz',  lesson:'Lesson 03', date:null,           score:null, taken:false },
+  { title:'BIM Fundamentals Quiz',   lesson:'Lesson 01', date:'Jun 1, 2026', score:90,  taken:true  },
+  { title:'BIM vs CAD Assessment',   lesson:'Lesson 02', date:'Jun 3, 2026', score:74,  taken:true  },
+  { title:'Revit Essentials Quiz',   lesson:'Lesson 03', date:null,          score:null, taken:false },
   { title:'LOD Standards Assessment',lesson:'Lesson 04', date:null,          score:null, taken:false, locked:true },
 ];
 
@@ -51,7 +53,8 @@ export default function DashboardPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.push('/login'); return; }
       const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-      setProfile(data);
+      // Merge auth email into profile since profiles table has no email column
+      setProfile({ ...data, email: user.email });
 
       const { data: progress } = await supabase
         .from('lesson_progress').select('lesson_id').eq('user_id', user.id).eq('completed', true);
@@ -96,6 +99,7 @@ export default function DashboardPage() {
 
   const firstName = profile?.first_name || 'Student';
   const initials  = (firstName[0] + (profile?.last_name?.[0] || '')).toUpperCase();
+  const isAdmin   = ADMIN_EMAILS.includes(profile?.email);
 
   return (
     <div className="dash-layout">
@@ -103,17 +107,18 @@ export default function DashboardPage() {
       {/* SIDEBAR */}
       <aside className="sidebar">
         <div className="sidebar-logo">
-          <div className="logo-text">Dharren Park <span>BIM</span></div>
+          {/* Fixed: shortened to prevent overflow */}
+          <div className="logo-text">Dharren <span>BIM</span></div>
           <div className="logo-sub">Student Portal</div>
         </div>
 
         <nav className="nav-section">
           <div className="nav-label">Main</div>
           {[
-            { id:'overview',   icon:'🏠', label:'Overview'         },
-            { id:'lessons',    icon:'📚', label:'My Lessons'       },
-            { id:'quizzes',    icon:'📝', label:'Quiz Scores'      },
-            { id:'resources',  icon:'📁', label:'Resources'        },
+            { id:'overview',   icon:'🏠', label:'Overview'    },
+            { id:'lessons',    icon:'📚', label:'My Lessons'  },
+            { id:'quizzes',    icon:'📝', label:'Quiz Scores' },
+            { id:'resources',  icon:'📁', label:'Resources'   },
           ].map(item => (
             <div
               key={item.id}
@@ -129,8 +134,8 @@ export default function DashboardPage() {
         <nav className="nav-section">
           <div className="nav-label">Account</div>
           {[
-            { id:'billing',  icon:'💳', label:'Plan & Billing'    },
-            { id:'profile',  icon:'⚙️', label:'Profile Settings'  },
+            { id:'billing',  icon:'💳', label:'Plan & Billing'   },
+            { id:'profile',  icon:'⚙️', label:'Profile Settings' },
           ].map(item => (
             <div
               key={item.id}
@@ -148,7 +153,13 @@ export default function DashboardPage() {
             <div className="avatar">{initials}</div>
             <div>
               <div className="user-name">{firstName} {profile?.last_name}</div>
-              <div className="user-plan">{profile?.plan || 'Free'} Plan</div>
+              {/* Fixed: show Admin in orange for admin email, plan for others */}
+              <div
+                className="user-plan"
+                style={{ color: isAdmin ? '#f59e0b' : undefined }}
+              >
+                {isAdmin ? '⚙ Admin' : `${profile?.plan || 'Free'} Plan`}
+              </div>
             </div>
           </div>
           <div className="logout-btn" onClick={handleLogout}>🚪 Log Out</div>
@@ -213,8 +224,8 @@ export default function DashboardPage() {
                 </div>
                 <div className="lesson-list">
                   {byCategory(cat).map(lesson => {
-                    const isLocked  = cat === 'advanced' && profile?.plan === 'free';
-                    const isDone    = completed.has(lesson.id);
+                    const isLocked = cat === 'advanced' && profile?.plan === 'free';
+                    const isDone   = completed.has(lesson.id);
                     return (
                       <div
                         key={lesson.id}

@@ -1,4 +1,5 @@
 'use client';
+import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
@@ -14,12 +15,22 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const links = [
-    { href: '/', label: 'Home' },
-    { href: '/lessons', label: 'Lessons' },
-    { href: '/pricing', label: 'Pricing' },
-    { href: '/dashboard', label: 'Dashboard' },
-  ];
+  const ADMIN_EMAILS = ['dharrenpark2024@gmail.com'];
+const [userEmail, setUserEmail] = useState('');
+
+useEffect(() => {
+  supabase.auth.getUser().then(({ data }) => {
+    setUserEmail(data?.user?.email || '');
+  });
+}, []);
+
+const links = [
+  { href: '/', label: 'Home' },
+  { href: '/lessons', label: 'Lessons' },
+  { href: '/pricing', label: 'Pricing' },
+  { href: '/dashboard', label: 'Dashboard' },
+  ...(ADMIN_EMAILS.includes(userEmail) ? [{ href: '/admin', label: '⚙ Admin' }] : []),
+];
 
   return (
     <nav style={{
