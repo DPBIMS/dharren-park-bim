@@ -4,29 +4,30 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
 const plans = [
-  { name: 'basic',   label: 'Basic',   desc: 'For beginners starting their BIM journey.',       monthly: 299,  annual: 239,  features: ['Full access to BIM articles','Core lessons & topics','Beginner learning path'],                                              unavail: ['Downloadable PDFs','Quizzes & assessments','Video lessons'],          featured: false },
-  { name: 'pro',     label: 'Pro',     desc: 'For students serious about BIM careers.',          monthly: 599,  annual: 479,  features: ['Everything in Basic','Downloadable PDFs','Quizzes & assessments','Intermediate lessons'],                                   unavail: ['Video lessons','3D model resources'],                                  featured: true  },
-  { name: 'premium', label: 'Premium', desc: 'Full access to everything, now and future.',       monthly: 999,  annual: 799,  features: ['Everything in Pro','Video lessons (coming soon)','3D model resources','Priority support','Early access','Certificate'],     unavail: [],                                                                     featured: false },
+  { name: 'basic',   label: 'Basic',   desc: 'For beginners starting their BIM journey.',     monthly: 299,  annual: 239,  features: ['Full access to BIM articles','Core lessons & topics','Beginner learning path'],                                          unavail: ['Downloadable PDFs','Quizzes & assessments','Video lessons'],       featured: false },
+  { name: 'pro',     label: 'Pro',     desc: 'For students serious about BIM careers.',        monthly: 599,  annual: 479,  features: ['Everything in Basic','Downloadable PDFs','Quizzes & assessments','Intermediate lessons'],                               unavail: ['Video lessons','3D model resources'],                               featured: true  },
+  { name: 'premium', label: 'Premium', desc: 'Full access to everything, now and future.',     monthly: 999,  annual: 799,  features: ['Everything in Pro','Video lessons (coming soon)','3D model resources','Priority support','Early access','Certificate'], unavail: [],                                                                  featured: false },
 ];
 
 const methods = [
-  { id: 'gcash',  icon: '💙', name: 'GCash',          sub: 'Send to 09XX XXX XXXX',      bg: 'rgba(0,136,255,0.12)'   },
-  { id: 'maya',   icon: '💚', name: 'Maya (PayMaya)',  sub: 'Send to 09XX XXX XXXX',      bg: 'rgba(0,180,100,0.12)'   },
-  { id: 'bank',   icon: '🏦', name: 'Bank Transfer',   sub: 'BDO / BPI / UnionBank',      bg: 'rgba(245,158,11,0.12)'  },
-  { id: 'paypal', icon: '🔵', name: 'PayPal',          sub: 'paypal.me/dharrenparkbim',   bg: 'rgba(0,48,135,0.18)'    },
+  { id: 'gcash',  icon: '💙', name: 'GCash',         sub: 'Scan QR or send to +63 922 562 ••••', bg: 'rgba(0,136,255,0.12)'  },
+  { id: 'maya',   icon: '💚', name: 'Maya (PayMaya)', sub: 'Send to 09XX XXX XXXX',               bg: 'rgba(0,180,100,0.12)'  },
+  { id: 'bank',   icon: '🏦', name: 'Bank Transfer',  sub: 'BDO / BPI / UnionBank',               bg: 'rgba(245,158,11,0.12)' },
+  { id: 'paypal', icon: '🔵', name: 'PayPal',         sub: 'paypal.me/dharrenparkbim',            bg: 'rgba(0,48,135,0.18)'   },
 ];
 
 export default function PricingPage() {
-  const [annual, setAnnual] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState('pro');
+  const [annual,         setAnnual]         = useState(false);
+  const [selectedPlan,   setSelectedPlan]   = useState('pro');
   const [selectedMethod, setSelectedMethod] = useState('gcash');
-  const [email, setEmail] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [ref, setRef] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [user, setUser] = useState(null);
+  const [email,          setEmail]          = useState('');
+  const [fullName,       setFullName]       = useState('');
+  const [ref,            setRef]            = useState('');
+  const [submitted,      setSubmitted]      = useState(false);
+  const [loading,        setLoading]        = useState(false);
+  const [error,          setError]          = useState('');
+  const [user,           setUser]           = useState(null);
+  const [qrFullscreen,   setQrFullscreen]   = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -39,77 +40,69 @@ export default function PricingPage() {
     });
   }, []);
 
-  const plan = plans.find(p => p.name === selectedPlan);
+  const plan  = plans.find(p => p.name === selectedPlan);
   const price = annual ? plan.annual : plan.monthly;
 
-// Replace your existing handleSubmit function in app/pricing/page.js with this:
-
-const handleSubmit = async () => {
-  if (!email || !ref) { setError('Please enter your email and reference number.'); return; }
-  if (!email.includes('@')) { setError('Enter a valid email address.'); return; }
-  setError(''); setLoading(true);
-
-  try {
-    let userId = user?.id;
-    if (!userId) {
-      const { data } = await supabase.auth.getUser();
-      userId = data?.user?.id;
-    }
-    if (!userId) {
-      setError('Please log in first before submitting payment.');
-      setLoading(false);
-      return;
-    }
-
-    // 1. Save payment submission to Supabase
-    const { error: insertError } = await supabase
-      .from('payment_submissions')
-      .insert({
-        user_id:          userId,
-        email,
-        full_name:        fullName,
-        plan:             selectedPlan,
-        billing:          annual ? 'annual' : 'monthly',
-        amount:           price,
-        payment_method:   selectedMethod,
-        reference_number: ref.trim(),
-        status:           'pending',
-      });
-
-    if (insertError) throw insertError;
-
-    // 2. Notify admin via email (non-blocking — don't fail if this errors)
+  const handleSubmit = async () => {
+    if (!email || !ref) { setError('Please enter your email and reference number.'); return; }
+    if (!email.includes('@')) { setError('Enter a valid email address.'); return; }
+    setError(''); setLoading(true);
     try {
-      await fetch('/api/notify-admin', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          studentName:  fullName  || 'Unknown',
-          studentEmail: email,
-          plan:         selectedPlan,
-          billing:      annual ? 'annual' : 'monthly',
-          amount:       price,
-          method:       selectedMethod,
-          reference:    ref.trim(),
-        }),
+      let userId = user?.id;
+      if (!userId) {
+        const { data } = await supabase.auth.getUser();
+        userId = data?.user?.id;
+      }
+      if (!userId) { setError('Please log in first before submitting payment.'); setLoading(false); return; }
+
+      const { error: insertError } = await supabase.from('payment_submissions').insert({
+        user_id: userId, email, full_name: fullName, plan: selectedPlan,
+        billing: annual ? 'annual' : 'monthly', amount: price,
+        payment_method: selectedMethod, reference_number: ref.trim(), status: 'pending',
       });
-    } catch (notifyErr) {
-      // Don't block submission if email fails
-      console.error('Admin notify failed:', notifyErr);
+      if (insertError) throw insertError;
+
+      try {
+        await fetch('/api/notify-admin', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ studentName: fullName || 'Unknown', studentEmail: email, plan: selectedPlan, billing: annual ? 'annual' : 'monthly', amount: price, method: selectedMethod, reference: ref.trim() }),
+        });
+      } catch (notifyErr) { console.error('Admin notify failed:', notifyErr); }
+
+      setSubmitted(true);
+    } catch (err) {
+      setError(err.message || 'Something went wrong. Please try again.');
     }
-
-    setSubmitted(true);
-
-  } catch (err) {
-    setError(err.message || 'Something went wrong. Please try again.');
-  }
-  setLoading(false);
-};
+    setLoading(false);
+  };
 
   const inp = { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '9px 12px', color: '#e8eaf0', fontSize: '13px', fontFamily: "'DM Sans',sans-serif", outline: 'none', width: '100%' };
 
   return (
     <main style={{ background: '#0a0e1a', color: '#e8eaf0', minHeight: '100vh', paddingTop: '80px', fontFamily: "'DM Sans',sans-serif" }}>
+
+      {/* Fullscreen QR overlay */}
+      {qrFullscreen && (
+        <div
+          onClick={() => setQrFullscreen(false)}
+          style={{ position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(0,0,0,0.95)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'zoom-out' }}
+        >
+          <div style={{ background: '#fff', borderRadius: '20px', padding: '28px', marginBottom: '20px' }}>
+            <img
+  src="/gcash-qr.jpg"
+  alt="GCash QR Code"
+  style={{ display: 'block', maxWidth: '90vw', maxHeight: '90vh', imageRendering: 'pixelated' }}
+/>
+          </div>
+          <div style={{ color: '#fff', fontSize: '16px', fontWeight: 700, marginBottom: '6px' }}>DA***N J** P.</div>
+          <div style={{ color: '#93c5fd', fontSize: '14px', marginBottom: '8px' }}>+63 922 562 ••••</div>
+          <div style={{ background: 'rgba(0,136,255,0.2)', border: '1px solid rgba(0,136,255,0.4)', borderRadius: '10px', padding: '10px 24px', color: '#60a5fa', fontSize: '16px', fontWeight: 800, marginBottom: '20px' }}>
+            Send exactly ₱{price?.toLocaleString()}
+          </div>
+          <div style={{ color: '#6b7280', fontSize: '13px' }}>Tap anywhere to close</div>
+        </div>
+      )}
+
       <div style={{ maxWidth: '960px', margin: '0 auto', padding: '2.5rem 1.5rem' }}>
 
         {/* Header */}
@@ -130,11 +123,7 @@ const handleSubmit = async () => {
         {/* Plans Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '1.25rem', marginBottom: '2.5rem' }}>
           {plans.map(p => (
-            <div key={p.name} onClick={() => setSelectedPlan(p.name)} style={{
-              background: selectedPlan === p.name ? 'rgba(37,99,235,0.07)' : 'rgba(255,255,255,0.04)',
-              border: `1px solid ${selectedPlan === p.name ? '#2563eb' : p.featured ? 'rgba(37,99,235,0.4)' : 'rgba(255,255,255,0.08)'}`,
-              borderRadius: '16px', padding: '1.75rem', position: 'relative', cursor: 'pointer', transition: 'all .2s',
-            }}>
+            <div key={p.name} onClick={() => setSelectedPlan(p.name)} style={{ background: selectedPlan === p.name ? 'rgba(37,99,235,0.07)' : 'rgba(255,255,255,0.04)', border: `1px solid ${selectedPlan === p.name ? '#2563eb' : p.featured ? 'rgba(37,99,235,0.4)' : 'rgba(255,255,255,0.08)'}`, borderRadius: '16px', padding: '1.75rem', position: 'relative', cursor: 'pointer', transition: 'all .2s' }}>
               {p.featured && <div style={{ position: 'absolute', top: '-11px', left: '50%', transform: 'translateX(-50%)', background: '#2563eb', color: '#fff', fontSize: '10px', fontWeight: 600, padding: '3px 12px', borderRadius: '100px', whiteSpace: 'nowrap' }}>Most Popular</div>}
               {selectedPlan === p.name && <div style={{ position: 'absolute', top: '14px', right: '14px', width: '18px', height: '18px', borderRadius: '50%', background: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>✓</div>}
               <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '15px', marginBottom: '.2rem' }}>{p.label}</div>
@@ -162,12 +151,7 @@ const handleSubmit = async () => {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '.5rem', marginBottom: '1.25rem' }}>
                 {methods.map(m => (
-                  <div key={m.id} onClick={() => setSelectedMethod(m.id)} style={{
-                    display: 'flex', alignItems: 'center', gap: '.75rem',
-                    background: selectedMethod === m.id ? 'rgba(37,99,235,0.06)' : 'rgba(255,255,255,0.03)',
-                    border: `1px solid ${selectedMethod === m.id ? '#2563eb' : 'rgba(255,255,255,0.08)'}`,
-                    borderRadius: '10px', padding: '.75rem 1rem', cursor: 'pointer', transition: 'all .2s',
-                  }}>
+                  <div key={m.id} onClick={() => setSelectedMethod(m.id)} style={{ display: 'flex', alignItems: 'center', gap: '.75rem', background: selectedMethod === m.id ? 'rgba(37,99,235,0.06)' : 'rgba(255,255,255,0.03)', border: `1px solid ${selectedMethod === m.id ? '#2563eb' : 'rgba(255,255,255,0.08)'}`, borderRadius: '10px', padding: '.75rem 1rem', cursor: 'pointer', transition: 'all .2s' }}>
                     <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: m.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>{m.icon}</div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: '13px', fontWeight: 500 }}>{m.name}</div>
@@ -180,12 +164,55 @@ const handleSubmit = async () => {
                 ))}
               </div>
 
+              {/* GCash QR Code */}
+              {selectedMethod === 'gcash' && (
+                <div style={{ background: 'rgba(0,136,255,0.06)', border: '1px solid rgba(0,136,255,0.2)', borderRadius: '12px', padding: '1.25rem', marginBottom: '1.25rem', textAlign: 'center' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: '#60a5fa', marginBottom: '.75rem', letterSpacing: '.5px' }}>
+                    💙 SCAN TO PAY VIA GCASH
+                  </div>
+                  <div
+                    onClick={() => setQrFullscreen(true)}
+                    style={{ display: 'inline-block', background: '#fff', borderRadius: '12px', padding: '12px', marginBottom: '.75rem', cursor: 'zoom-in', position: 'relative' }}
+                    title="Tap to enlarge"
+                  >
+                    <img
+  src="/gcash-qr.jpg"
+  alt="GCash QR Code"
+  style={{ display: 'block', maxWidth: '100%', imageRendering: 'pixelated' }}
+/>
+                    <div style={{ position: 'absolute', bottom: '16px', right: '16px', background: 'rgba(0,0,0,0.65)', borderRadius: '4px', padding: '2px 7px', fontSize: '10px', color: '#fff', fontWeight: 500 }}>
+                      🔍 Tap to enlarge
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#8892a4', lineHeight: '1.8' }}>
+                    <div style={{ color: '#e8eaf0', fontWeight: 600, fontSize: '13px' }}>DA***N J** P.</div>
+                    <div>+63 922 562 ••••</div>
+                    <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px' }}>Tap QR to enlarge · Open GCash → Scan QR</div>
+                  </div>
+                  <div style={{ marginTop: '.75rem', background: 'rgba(0,136,255,0.1)', borderRadius: '8px', padding: '8px 12px', fontSize: '13px', fontWeight: 700, color: '#60a5fa' }}>
+                    Send exactly ₱{price?.toLocaleString()}
+                  </div>
+                </div>
+              )}
+
+              {/* How to pay */}
               <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '1rem', fontSize: '12px', color: '#8892a4', lineHeight: '1.8', marginBottom: '1.25rem' }}>
                 <strong style={{ color: '#e8eaf0', display: 'block', marginBottom: '.4rem' }}>How to pay:</strong>
-                <div>1. Send ₱{price?.toLocaleString()} to the account above</div>
-                <div>2. Screenshot your receipt</div>
-                <div>3. Fill in your details and reference number</div>
-                <div>4. Submit — we confirm within 24 hours ✓</div>
+                {selectedMethod === 'gcash' ? (
+                  <>
+                    <div>1. Tap the QR above to enlarge → Scan with GCash</div>
+                    <div>2. Send exactly ₱{price?.toLocaleString()} and complete payment</div>
+                    <div>3. Copy your <strong style={{ color: '#e8eaf0' }}>reference number</strong> from the receipt</div>
+                    <div>4. Fill in the form below and submit ✓</div>
+                  </>
+                ) : (
+                  <>
+                    <div>1. Send ₱{price?.toLocaleString()} to the account above</div>
+                    <div>2. Screenshot your receipt</div>
+                    <div>3. Fill in your details and reference number</div>
+                    <div>4. Submit — we confirm within 24 hours ✓</div>
+                  </>
+                )}
               </div>
 
               {error && <div style={{ background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: '8px', padding: '10px', fontSize: '12px', color: '#f87171', marginBottom: '1rem' }}>⚠ {error}</div>}
@@ -201,7 +228,7 @@ const handleSubmit = async () => {
               <div>
                 <label style={{ fontSize: '11px', fontWeight: 500, color: '#8892a4', display: 'block', marginBottom: '.35rem', letterSpacing: '.3px' }}>REFERENCE / TRANSACTION NUMBER</label>
                 <input placeholder="e.g. 123456789012" value={ref} onChange={e => setRef(e.target.value)} style={inp} />
-                <div style={{ fontSize: '11px', color: '#8892a4', marginTop: '4px' }}>Found in your GCash, Maya, or banking app after payment</div>
+                <div style={{ fontSize: '11px', color: '#8892a4', marginTop: '4px' }}>Found in your GCash receipt after payment</div>
               </div>
             </div>
 
@@ -237,12 +264,7 @@ const handleSubmit = async () => {
                 </div>
               )}
 
-              <button onClick={handleSubmit} disabled={!email || !ref || loading} style={{
-                width: '100%', background: '#2563eb', color: '#fff', border: 'none', padding: '12px',
-                borderRadius: '8px', fontSize: '14px', fontWeight: 600,
-                cursor: (!email || !ref || loading) ? 'not-allowed' : 'pointer',
-                opacity: (!email || !ref) ? .5 : 1, fontFamily: "'DM Sans',sans-serif",
-              }}>
+              <button onClick={handleSubmit} disabled={!email || !ref || loading} style={{ width: '100%', background: '#2563eb', color: '#fff', border: 'none', padding: '12px', borderRadius: '8px', fontSize: '14px', fontWeight: 600, cursor: (!email || !ref || loading) ? 'not-allowed' : 'pointer', opacity: (!email || !ref) ? .5 : 1, fontFamily: "'DM Sans',sans-serif" }}>
                 {loading ? 'Submitting...' : `Submit Payment — ₱${price?.toLocaleString()}`}
               </button>
               <div style={{ textAlign: 'center', fontSize: '11px', color: '#8892a4', marginTop: '.75rem' }}>🔒 Your details are kept secure and private</div>
