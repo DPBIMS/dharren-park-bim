@@ -1,294 +1,435 @@
 'use client';
-import { supabase } from '@/lib/supabase';
-import Link from 'next/link';
+
 import { useState, useEffect, useRef } from 'react';
-import { usePathname } from 'next/navigation';
+import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
-const ADMIN_EMAILS = ['dharrenpark2024@gmail.com'];
+// ─── NAV DATA ────────────────────────────────────────────────────────────────
 
-/* ─── Nav data ───────────────────────────────────────────────── */
 const NAV_ITEMS = [
   {
     label: 'Learn',
+    tier: 'FOUNDATION',
+    badge: null,
+    description: 'Curiosity-first BIM concepts for anyone starting out.',
     columns: [
       {
-        title: 'Foundation',
-        links: [
-          { href: '/learn/bim-basics',      icon: '⬡', label: 'BIM basics',      sub: 'What is BIM & why it matters' },
-          { href: '/learn/bim-dimensions',  icon: '◫', label: 'BIM dimensions',   sub: '3D through 8D explained' },
-          { href: '/learn/lod-overview',    icon: '≡', label: 'LOD overview',     sub: 'Levels of development' },
-          { href: '/learn/bim-roles',       icon: '◎', label: 'BIM roles',        sub: 'Who does what on a BIM project' },
-        ],
-      },
-      {
-        title: 'Standards',
-        links: [
-          { href: '/standards/iso-19650',   icon: '✦', label: 'ISO 19650',        sub: 'Parts 1–6 series',          badge: 'Updated', badgeColor: '#10b981' },
-          { href: '/standards/tracker',     icon: '↻', label: 'Revision tracker', sub: 'What changed & when' },
-          { href: '/standards/matrix',      icon: '⊞', label: 'Matrix & setup',   sub: 'Compliance checklists' },
+        heading: 'FOUNDATION',
+        items: [
+          {
+            icon: 'circle',
+            label: 'BIM basics',
+            sub: 'What is BIM & why it matters',
+            href: '/foundation/bim-basics',
+          },
+          {
+            icon: 'grid',
+            label: 'BIM dimensions',
+            sub: '3D through 8D explained',
+            href: '/foundation/bim-dimensions',
+          },
+          {
+            icon: 'list',
+            label: 'LOD overview',
+            sub: 'Levels of development',
+            href: '/foundation/lod-overview',
+          },
+          {
+            icon: 'user',
+            label: 'BIM roles',
+            sub: 'Who does what on a BIM project',
+            href: '/foundation/bim-roles',
+          },
         ],
       },
     ],
   },
   {
     label: 'Software',
+    tier: 'BEGINNER',
+    badge: null,
+    description: 'Industry tools from Revit to Navisworks and beyond.',
     columns: [
       {
-        title: 'Revit',
-        links: [
-          { href: '/software/revit/getting-started', icon: '▶', label: 'Getting started', sub: 'Interface & first model' },
-          { href: '/software/revit/workflow',         icon: '⇌', label: 'Workflow',        sub: 'Collaborate & coordinate' },
-          { href: '/software/revit/families',         icon: '⬙', label: 'Family creation', sub: 'Custom parametric families' },
+        heading: 'REVIT',
+        items: [
+          {
+            icon: 'play',
+            label: 'Getting started',
+            sub: 'Interface & first model',
+            href: '/software/revit/getting-started',
+          },
+          {
+            icon: 'arrows',
+            label: 'Workflow',
+            sub: 'Collaborate & coordinate',
+            href: '/software/revit/workflow',
+          },
+          {
+            icon: 'diamond',
+            label: 'Family creation',
+            sub: 'Custom parametric families',
+            href: '/software/revit/family-creation',
+          },
         ],
       },
       {
-        title: 'Navisworks',
-        links: [
-          { href: '/software/navisworks/getting-started', icon: '▶', label: 'Getting started', sub: 'Navigation & review' },
-          { href: '/software/navisworks/clash',           icon: '⚡', label: 'Clash detection', sub: 'Find & resolve conflicts' },
-          { href: '/software/navisworks/4d',              icon: '◷', label: '4D simulation',   sub: 'Construction sequencing' },
+        heading: 'NAVISWORKS',
+        items: [
+          {
+            icon: 'play',
+            label: 'Getting started',
+            sub: 'Navigation & review',
+            href: '/software/navisworks/getting-started',
+          },
+          {
+            icon: 'zap',
+            label: 'Clash detection',
+            sub: 'Find & resolve conflicts',
+            href: '/software/navisworks/clash-detection',
+          },
+          {
+            icon: 'clock',
+            label: '4D simulation',
+            sub: 'Construction sequencing',
+            href: '/software/navisworks/4d-simulation',
+          },
         ],
       },
       {
-        title: 'Autodesk Cloud',
-        links: [
-          { href: '/software/forma', icon: '☁', label: 'Forma', sub: 'Early-stage design',   badge: 'Soon', badgeColor: '#f59e0b' },
-          { href: '/software/acc',   icon: '⬡', label: 'ACC',   sub: 'Construction Cloud',   badge: 'Soon', badgeColor: '#f59e0b' },
+        heading: 'AUTODESK CLOUD',
+        items: [
+          {
+            icon: 'cloud',
+            label: 'Forma',
+            sub: 'Early-stage design',
+            href: '/software/forma',
+            badge: 'Soon',
+          },
+          {
+            icon: 'circle',
+            label: 'ACC',
+            sub: 'Construction Cloud',
+            href: '/software/acc',
+            badge: 'Soon',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    label: 'Standards',
+    tier: 'INTERMEDIATE',
+    badge: null,
+    description: 'ISO norms, revision tracking and compliance frameworks.',
+    columns: [
+      {
+        heading: 'STANDARDS',
+        items: [
+          {
+            icon: 'plus',
+            label: 'ISO 19650',
+            sub: 'Parts 1–6 series',
+            href: '/standards/iso-19650',
+            badge: 'Updated',
+            badgeColor: 'green',
+          },
+          {
+            icon: 'refresh',
+            label: 'Revision tracker',
+            sub: 'What changed & when',
+            href: '/standards/revision-tracker',
+          },
+          {
+            icon: 'grid',
+            label: 'Matrix & setup',
+            sub: 'Compliance checklists',
+            href: '/standards/matrix-setup',
+          },
         ],
       },
     ],
   },
   {
     label: 'Automation',
-    narrow: true,
+    tier: 'ADVANCED',
+    badge: null,
+    description: 'Dynamo, pyRevit and API scripting for power users.',
     columns: [
       {
-        links: [
-          { href: '/automation/dynamo',   icon: '⬡', label: 'Dynamo',    sub: 'Visual scripting for Revit' },
-          { href: '/automation/pyrevit',  icon: '⌨', label: 'pyRevit',   sub: 'Python-powered Revit tools' },
-          { href: '/automation/revit-api',icon: '{ }',label: 'Revit API', sub: 'C# & .NET development' },
-          { href: '/automation/plugins',  icon: '⊕', label: 'Plug-ins',  sub: 'Best extensions & add-ons' },
+        heading: 'AUTOMATION',
+        items: [
+          {
+            icon: 'circle',
+            label: 'Dynamo',
+            sub: 'Visual scripting for Revit',
+            href: '/automation/dynamo',
+          },
+          {
+            icon: 'grid',
+            label: 'pyRevit',
+            sub: 'Python-powered Revit tools',
+            href: '/automation/pyrevit',
+          },
+          {
+            icon: 'code',
+            label: 'Revit API',
+            sub: 'C# & .NET development',
+            href: '/automation/revit-api',
+          },
+          {
+            icon: 'globe',
+            label: 'Plug-ins',
+            sub: 'Best extensions & add-ons',
+            href: '/automation/plugins',
+          },
         ],
       },
     ],
   },
   {
     label: 'AI in BIM',
-    narrow: true,
+    tier: 'ADVANCED',
+    badge: null,
+    description: 'Where artificial intelligence meets AEC workflows.',
     columns: [
       {
-        links: [
-          { href: '/ai/overview',     icon: '◈', label: 'AI overview',       sub: 'Where AI is changing AEC' },
-          { href: '/ai/generative',   icon: '✦', label: 'Generative design', sub: 'AI-driven form finding' },
-          { href: '/ai/prompting',    icon: '↳', label: 'Prompt engineering', sub: 'For AEC professionals' },
-          { href: '/ai/tools',        icon: '⊞', label: 'AI tools directory', sub: 'Curated tools for BIM teams', badge: 'New', badgeColor: '#10b981' },
+        heading: 'AI IN BIM',
+        items: [
+          {
+            icon: 'diamond',
+            label: 'AI overview',
+            sub: 'Where AI is changing AEC',
+            href: '/ai-in-bim/overview',
+          },
+          {
+            icon: 'plus',
+            label: 'Generative design',
+            sub: 'AI-driven form finding',
+            href: '/ai-in-bim/generative-design',
+          },
+          {
+            icon: 'arrow',
+            label: 'Prompt engineering',
+            sub: 'For AEC professionals',
+            href: '/ai-in-bim/prompt-engineering',
+          },
+          {
+            icon: 'grid',
+            label: 'AI tools directory',
+            sub: 'Curated tools for BIM teams',
+            href: '/ai-in-bim/tools-directory',
+            badge: 'New',
+            badgeColor: 'green',
+          },
         ],
       },
     ],
   },
   {
     label: 'Case Studies',
-    narrow: true,
+    tier: 'ADVANCED',
+    badge: null,
+    description: 'Real-world BIM projects across disciplines.',
     columns: [
       {
-        links: [
-          { href: '/case-studies/architecture', icon: '⬡', label: 'Architecture', sub: 'Building design projects' },
-          { href: '/case-studies/structure',    icon: '◫', label: 'Structure',     sub: 'Structural engineering' },
-          { href: '/case-studies/mep',          icon: '⚡', label: 'MEP',          sub: 'Mechanical, electrical, plumbing' },
-          { href: '/case-studies/mixed-use',    icon: '⊞', label: 'Mixed-use',    sub: 'Multi-discipline projects' },
+        heading: 'CASE STUDIES',
+        items: [
+          {
+            icon: 'circle',
+            label: 'Architecture',
+            sub: 'Building design projects',
+            href: '/case-studies/architecture',
+          },
+          {
+            icon: 'grid',
+            label: 'Structure',
+            sub: 'Structural engineering',
+            href: '/case-studies/structure',
+          },
+          {
+            icon: 'zap',
+            label: 'MEP',
+            sub: 'Mechanical, electrical, plumbing',
+            href: '/case-studies/mep',
+          },
+          {
+            icon: 'grid',
+            label: 'Mixed-use',
+            sub: 'Multi-discipline projects',
+            href: '/case-studies/mixed-use',
+          },
         ],
       },
     ],
   },
 ];
 
-/* ─── Styles (inline so no extra CSS file needed) ──────────────── */
-const S = {
-  nav: (scrolled) => ({
-    position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
-    background: scrolled ? 'rgba(10,14,26,0.95)' : '#0a0e1a',
-    backdropFilter: scrolled ? 'blur(14px)' : 'none',
-    borderBottom: '1px solid rgba(255,255,255,0.07)',
-    transition: 'all 0.3s',
-    fontFamily: "'DM Sans', sans-serif",
-  }),
-  inner: {
-    maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem',
-    display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '60px',
-  },
-  logo: {
-    fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '17px',
-    color: '#fff', textDecoration: 'none', letterSpacing: '-0.3px',
-    display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0,
-  },
-  logoIcon: {
-    width: '30px', height: '30px', borderRadius: '7px',
-    background: 'rgba(37,99,235,0.2)', border: '1px solid rgba(37,99,235,0.35)',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    fontSize: '14px', color: '#60a5fa',
-  },
-  navLinks: {
-    display: 'flex', alignItems: 'center', gap: '2px',
-  },
-  navBtn: (active) => ({
-    display: 'flex', alignItems: 'center', gap: '4px',
-    padding: '6px 11px', borderRadius: '7px', border: 'none',
-    background: active ? 'rgba(255,255,255,0.07)' : 'transparent',
-    color: active ? '#fff' : '#8892a4',
-    fontSize: '13px', fontWeight: 500, cursor: 'pointer',
-    fontFamily: "'DM Sans', sans-serif",
-    transition: 'all 0.15s', whiteSpace: 'nowrap',
-  }),
-  chevron: (open) => ({
-    fontSize: '9px', opacity: 0.5,
-    transition: 'transform 0.2s',
-    transform: open ? 'rotate(180deg)' : 'none',
-    display: 'inline-block',
-  }),
-  megaWrap: {
-    position: 'absolute', top: 'calc(100% + 6px)',
-    background: '#0f1527',
-    border: '1px solid rgba(255,255,255,0.09)',
-    borderRadius: '14px',
-    overflow: 'hidden',
-    zIndex: 999,
-    boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-    minWidth: '220px',
-  },
-  megaHeader: {
-    padding: '13px 16px 10px',
-    borderBottom: '1px solid rgba(255,255,255,0.06)',
-    display: 'flex', alignItems: 'center', gap: '8px',
-  },
-  tag: (color = '#3b82f6') => ({
-    fontSize: '10px', fontWeight: 600, padding: '2px 8px',
-    borderRadius: '20px', textTransform: 'uppercase', letterSpacing: '0.5px',
-    background: `${color}22`, color: color, border: `1px solid ${color}33`,
-  }),
-  megaTitle: {
-    fontSize: '13px', fontWeight: 500, color: '#e8eaf0',
-  },
-  megaBody: {
-    display: 'flex', padding: '10px',
-  },
-  megaCol: {
-    flex: 1, minWidth: '170px',
-  },
-  colTitle: {
-    fontSize: '10px', fontWeight: 600, textTransform: 'uppercase',
-    letterSpacing: '0.6px', color: '#4a5568', padding: '4px 10px 8px',
-  },
-  megaLink: {
-    display: 'flex', alignItems: 'center', gap: '10px',
-    padding: '8px 10px', borderRadius: '8px', cursor: 'pointer',
-    textDecoration: 'none', transition: 'background 0.12s',
-  },
-  megaIcon: {
-    width: '30px', height: '30px', borderRadius: '7px', flexShrink: 0,
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    fontSize: '13px', background: 'rgba(255,255,255,0.05)', color: '#8892a4',
-  },
-  megaLinkLabel: { fontSize: '13px', color: '#d1d8e8', lineHeight: 1.3 },
-  megaLinkSub: { fontSize: '11px', color: '#4a5568', lineHeight: 1.4 },
-  divider: { width: '1px', background: 'rgba(255,255,255,0.05)', margin: '6px 4px', flexShrink: 0 },
-  badge: (color) => ({
-    fontSize: '10px', fontWeight: 600, padding: '2px 7px', borderRadius: '10px',
-    background: `${color}22`, color: color, border: `1px solid ${color}33`,
-    whiteSpace: 'nowrap', marginLeft: 'auto',
-  }),
-  navRight: { display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 },
-  btnLogin: {
-    color: '#8892a4', fontSize: '13px', fontWeight: 500,
-    textDecoration: 'none', padding: '7px 14px',
-    border: '1px solid rgba(255,255,255,0.08)', borderRadius: '7px',
-    fontFamily: "'DM Sans', sans-serif",
-  },
-  btnCta: {
-    background: '#2563eb', color: '#fff', padding: '7px 18px',
-    borderRadius: '7px', fontSize: '13px', fontWeight: 500,
-    textDecoration: 'none', fontFamily: "'DM Sans', sans-serif",
-  },
-  btnDash: {
-    color: '#8892a4', fontSize: '13px', fontWeight: 500,
-    textDecoration: 'none', padding: '7px 14px',
-    border: '1px solid rgba(255,255,255,0.08)', borderRadius: '7px',
-    fontFamily: "'DM Sans', sans-serif",
-  },
-  btnAdmin: {
-    color: '#f59e0b', fontSize: '13px', fontWeight: 500,
-    textDecoration: 'none', padding: '7px 14px',
-    border: '1px solid rgba(245,158,11,0.25)', borderRadius: '7px',
-    background: 'rgba(245,158,11,0.07)', fontFamily: "'DM Sans', sans-serif",
-  },
-  // Mobile
-  hamburger: {
-    display: 'none', background: 'none', border: 'none',
-    cursor: 'pointer', padding: '4px', marginLeft: '8px',
-    flexDirection: 'column', gap: '5px',
-  },
-  bar: (transform) => ({
-    width: '20px', height: '2px', background: '#8892a4',
-    borderRadius: '2px', transition: 'all 0.2s',
-    transform,
-  }),
-  mobileMenu: {
-    background: '#0a0e1a',
-    borderTop: '1px solid rgba(255,255,255,0.06)',
-    padding: '0.75rem 1.25rem 1.25rem',
-    maxHeight: '85vh', overflowY: 'auto',
-  },
-  mobileSection: {
-    borderBottom: '1px solid rgba(255,255,255,0.05)',
-    paddingBottom: '8px', marginBottom: '8px',
-  },
-  mobileSectionBtn: {
-    width: '100%', display: 'flex', alignItems: 'center',
-    justifyContent: 'space-between', background: 'none', border: 'none',
-    color: '#e8eaf0', fontSize: '14px', fontWeight: 500,
-    fontFamily: "'DM Sans', sans-serif", cursor: 'pointer',
-    padding: '10px 4px',
-  },
-  mobileSubLink: {
-    display: 'block', color: '#8892a4', fontSize: '13px',
-    textDecoration: 'none', padding: '8px 12px',
-    borderRadius: '7px', transition: 'background 0.12s',
-  },
-  mobileCtas: {
-    display: 'flex', gap: '8px', marginTop: '12px',
-    paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.06)',
-  },
+// ─── TIER CONFIG ─────────────────────────────────────────────────────────────
+
+const TIER_CONFIG = {
+  FOUNDATION:   { label: 'FOUNDATION',   bg: '#1a2744', color: '#60a5fa' },
+  BEGINNER:     { label: 'BEGINNER',     bg: '#0f2d1f', color: '#34d399' },
+  INTERMEDIATE: { label: 'INTERMEDIATE', bg: '#2d1f0a', color: '#fbbf24' },
+  ADVANCED:     { label: 'ADVANCED',     bg: '#2d0a0a', color: '#f87171' },
 };
 
-/* ─── MegaMenu dropdown ─────────────────────────────────────────── */
-function MegaMenu({ item, closeAll }) {
-  const isNarrow = item.narrow;
+// ─── ICON HELPER ─────────────────────────────────────────────────────────────
+
+function NavIcon({ type }) {
+  const base = { width: 14, height: 14, stroke: 'currentColor', fill: 'none', strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round' };
+  const icons = {
+    circle:  <svg {...base}><circle cx="7" cy="7" r="5" /></svg>,
+    grid:    <svg {...base}><rect x="2" y="2" width="4" height="4" rx="0.5"/><rect x="8" y="2" width="4" height="4" rx="0.5"/><rect x="2" y="8" width="4" height="4" rx="0.5"/><rect x="8" y="8" width="4" height="4" rx="0.5"/></svg>,
+    list:    <svg {...base}><line x1="3" y1="5" x2="11" y2="5"/><line x1="3" y1="7" x2="11" y2="7"/><line x1="3" y1="9" x2="11" y2="9"/></svg>,
+    user:    <svg {...base}><circle cx="7" cy="5" r="2.5"/><path d="M2 12c0-2.76 2.24-5 5-5s5 2.24 5 5"/></svg>,
+    play:    <svg {...base}><polygon points="4,2 12,7 4,12" fill="currentColor" stroke="none"/></svg>,
+    arrows:  <svg {...base}><path d="M4 6h6M4 8h6M7 4l-3 2 3 2M7 10l3-2-3-2" /></svg>,
+    diamond: <svg {...base}><polygon points="7,2 12,7 7,12 2,7"/></svg>,
+    zap:     <svg {...base}><polygon points="7,1 1,8 6,8 5,13 13,6 8,6" fill="currentColor" stroke="none"/></svg>,
+    clock:   <svg {...base}><circle cx="7" cy="7" r="5"/><polyline points="7,4 7,7 9,9"/></svg>,
+    cloud:   <svg {...base}><path d="M4 10a3 3 0 010-6 4 4 0 018 1 2.5 2.5 0 010 5H4z"/></svg>,
+    plus:    <svg {...base}><line x1="7" y1="3" x2="7" y2="11"/><line x1="3" y1="7" x2="11" y2="7"/></svg>,
+    refresh: <svg {...base}><path d="M4 7a3 3 0 105.7-1.3"/><polyline points="9,3 9,6 12,6"/></svg>,
+    code:    <svg {...base}><polyline points="4,5 1,7 4,9"/><polyline points="10,5 13,7 10,9"/><line x1="8" y1="3" x2="6" y2="11"/></svg>,
+    globe:   <svg {...base}><circle cx="7" cy="7" r="5"/><path d="M2 7h10M7 2a8 8 0 000 10"/></svg>,
+    arrow:   <svg {...base}><line x1="3" y1="7" x2="11" y2="7"/><polyline points="8,4 11,7 8,10"/></svg>,
+  };
+  return icons[type] || icons.circle;
+}
+
+// ─── BADGE ───────────────────────────────────────────────────────────────────
+
+function Badge({ text, color = 'amber' }) {
+  const colors = {
+    amber: { bg: 'rgba(245,158,11,0.15)', text: '#fbbf24', border: 'rgba(245,158,11,0.3)' },
+    green: { bg: 'rgba(52,211,153,0.12)', text: '#34d399',  border: 'rgba(52,211,153,0.25)' },
+    blue:  { bg: 'rgba(96,165,250,0.12)', text: '#60a5fa',  border: 'rgba(96,165,250,0.25)' },
+  };
+  const c = colors[color] || colors.amber;
   return (
-    <div style={{ ...S.megaWrap, width: isNarrow ? '260px' : item.columns.length >= 3 ? '640px' : '460px' }}>
-      <div style={S.megaHeader}>
-        <span style={S.tag('#3b82f6')}>{item.columns.length > 1 ? 'Topics' : 'Advanced'}</span>
-        <span style={S.megaTitle}>{item.label}</span>
+    <span style={{
+      fontSize: 10, fontWeight: 600, letterSpacing: '0.06em',
+      padding: '2px 7px', borderRadius: 4,
+      background: c.bg, color: c.text, border: `1px solid ${c.border}`,
+      whiteSpace: 'nowrap', fontFamily: 'DM Sans, sans-serif',
+    }}>
+      {text}
+    </span>
+  );
+}
+
+// ─── DROPDOWN ────────────────────────────────────────────────────────────────
+
+function Dropdown({ item, onClose }) {
+  const tier = TIER_CONFIG[item.tier] || TIER_CONFIG.FOUNDATION;
+  const colCount = item.columns.length;
+
+  return (
+    <div style={{
+      position: 'absolute',
+      top: 'calc(100% + 8px)',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      background: '#0d1120',
+      border: '1px solid rgba(255,255,255,0.08)',
+      borderRadius: 12,
+      boxShadow: '0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(37,99,235,0.1)',
+      minWidth: colCount === 1 ? 260 : colCount === 2 ? 460 : 620,
+      zIndex: 100,
+      overflow: 'hidden',
+    }}>
+      {/* Header */}
+      <div style={{
+        padding: '14px 20px 12px',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+      }}>
+        <span style={{
+          fontSize: 10, fontWeight: 700, letterSpacing: '0.1em',
+          padding: '3px 8px', borderRadius: 5,
+          background: tier.bg, color: tier.color,
+          border: `1px solid ${tier.color}30`,
+          fontFamily: 'DM Sans, sans-serif',
+        }}>
+          {tier.label}
+        </span>
+        <span style={{
+          fontSize: 15, fontWeight: 700, color: '#fff',
+          fontFamily: 'Syne, sans-serif', letterSpacing: '-0.02em',
+        }}>
+          {item.label}
+        </span>
       </div>
-      <div style={S.megaBody}>
+
+      {/* Columns */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: `repeat(${colCount}, 1fr)`,
+        gap: 0,
+      }}>
         {item.columns.map((col, ci) => (
-          <div key={ci} style={{ display: 'contents' }}>
-            {ci > 0 && <div style={S.divider} />}
-            <div style={S.megaCol}>
-              {col.title && <div style={S.colTitle}>{col.title}</div>}
-              {col.links.map((link) => (
+          <div key={ci} style={{
+            padding: '16px 20px 18px',
+            borderRight: ci < colCount - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+          }}>
+            <p style={{
+              fontSize: 10, fontWeight: 700, letterSpacing: '0.12em',
+              color: '#3d4a6b', marginBottom: 10,
+              fontFamily: 'DM Sans, sans-serif',
+            }}>
+              {col.heading}
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {col.items.map((link, li) => (
                 <Link
-                  key={link.href}
+                  key={li}
                   href={link.href}
-                  onClick={closeAll}
-                  style={S.megaLink}
+                  onClick={onClose}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '8px 10px', borderRadius: 8,
+                    transition: 'background 0.15s',
+                    cursor: 'pointer',
+                  }}
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                >
-                  <div style={S.megaIcon}>{link.icon}</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={S.megaLinkLabel}>{link.label}</div>
-                    {link.sub && <div style={S.megaLinkSub}>{link.sub}</div>}
+                  >
+                    {/* Icon box */}
+                    <div style={{
+                      width: 30, height: 30, borderRadius: 7, flexShrink: 0,
+                      background: 'rgba(255,255,255,0.04)',
+                      border: '1px solid rgba(255,255,255,0.07)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#5a6fa8',
+                    }}>
+                      <NavIcon type={link.icon} />
+                    </div>
+                    {/* Text */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{
+                        fontSize: 13.5, fontWeight: 600, color: '#e2e8f0',
+                        fontFamily: 'DM Sans, sans-serif', lineHeight: 1.2,
+                      }}>
+                        {link.label}
+                      </div>
+                      <div style={{
+                        fontSize: 11.5, color: '#4a5a80',
+                        fontFamily: 'DM Sans, sans-serif', lineHeight: 1.3, marginTop: 1,
+                      }}>
+                        {link.sub}
+                      </div>
+                    </div>
+                    {/* Badge */}
+                    {link.badge && (
+                      <Badge text={link.badge} color={link.badgeColor || 'amber'} />
+                    )}
                   </div>
-                  {link.badge && <span style={S.badge(link.badgeColor)}>{link.badge}</span>}
                 </Link>
               ))}
             </div>
@@ -299,177 +440,430 @@ function MegaMenu({ item, closeAll }) {
   );
 }
 
-/* ─── Main Navbar ────────────────────────────────────────────────── */
+// ─── NAVBAR ──────────────────────────────────────────────────────────────────
+
 export default function Navbar() {
-  const [scrolled,    setScrolled]    = useState(false);
-  const [openMenu,    setOpenMenu]    = useState(null);  // label of open mega
-  const [mobileOpen,  setMobileOpen]  = useState(false);
-  const [mobileExpand,setMobileExpand]= useState(null);  // label of expanded mobile section
-  const [userEmail,   setUserEmail]   = useState('');
-  const [authReady,   setAuthReady]   = useState(false);
-  const pathname = usePathname();
+  const [user, setUser]           = useState(null);
+  const [isAdmin, setIsAdmin]     = useState(false);
+  const [activeMenu, setActiveMenu] = useState(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileExpanded, setMobileExpanded] = useState(null);
+  const [scrolled, setScrolled]   = useState(false);
   const navRef = useRef(null);
+  const closeTimer = useRef(null);
+  const router = useRouter();
+  const pathname = usePathname();
 
-  /* Scroll listener */
+  // ── Auth ──────────────────────────────────────────────────────────────────
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', fn);
-    return () => window.removeEventListener('scroll', fn);
-  }, []);
-
-  /* Auth */
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUserEmail(data?.user?.email || '');
-      setAuthReady(true);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) checkAdmin(session.user.id);
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      setUserEmail(session?.user?.email || '');
-      setAuthReady(true);
+      setUser(session?.user ?? null);
+      if (session?.user) checkAdmin(session.user.id);
+      else setIsAdmin(false);
     });
     return () => subscription.unsubscribe();
   }, []);
 
-  /* Close on outside click */
+  async function checkAdmin(uid) {
+    const { data } = await supabase.from('profiles').select('role').eq('id', uid).single();
+    setIsAdmin(data?.role === 'admin');
+  }
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    router.push('/');
+  }
+
+  // ── Scroll shadow ─────────────────────────────────────────────────────────
   useEffect(() => {
-    const fn = (e) => { if (navRef.current && !navRef.current.contains(e.target)) setOpenMenu(null); };
-    document.addEventListener('mousedown', fn);
-    return () => document.removeEventListener('mousedown', fn);
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  /* Close menus on route change */
-  useEffect(() => { setOpenMenu(null); setMobileOpen(false); }, [pathname]);
+  // ── Click outside ─────────────────────────────────────────────────────────
+  useEffect(() => {
+    function handleClick(e) {
+      if (navRef.current && !navRef.current.contains(e.target)) {
+        setActiveMenu(null);
+        setMobileOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
-  const isAdmin   = authReady && ADMIN_EMAILS.includes(userEmail);
-  const isLoggedIn= authReady && !!userEmail;
+  // ── Hover helpers ─────────────────────────────────────────────────────────
+  function handleNavEnter(label) {
+    clearTimeout(closeTimer.current);
+    setActiveMenu(label);
+  }
+  function handleNavLeave() {
+    closeTimer.current = setTimeout(() => setActiveMenu(null), 120);
+  }
+  function handleDropdownEnter() {
+    clearTimeout(closeTimer.current);
+  }
 
-  const closeAll = () => { setOpenMenu(null); setMobileOpen(false); };
-
-  /* Calculate left offset for mega-menus so they don't go off-screen */
-  const getMenuStyle = (idx) => {
-    // First two items: anchor left. Last two: anchor right.
-    if (idx >= 3) return { right: 0 };
-    return { left: 0 };
-  };
-
+  // ─────────────────────────────────────────────────────────────────────────
   return (
-    <nav style={S.nav(scrolled)} ref={navRef}>
+    <>
+      {/* ── Google Fonts ── */}
       <style>{`
-        @media (max-width: 900px) {
-          .nav-desktop { display: none !important; }
-          .hamburger-btn { display: flex !important; }
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap');
+
+        .dpbim-nav-link {
+          display: flex; align-items: center; gap: 4px;
+          padding: 6px 11px; border-radius: 6px;
+          font-size: 13.5px; font-weight: 500;
+          color: #8b95b8; cursor: pointer;
+          transition: color 0.15s, background 0.15s;
+          white-space: nowrap;
+          font-family: 'DM Sans', sans-serif;
+          background: none; border: none; outline: none;
+          position: relative;
+          user-select: none;
         }
-        @media (min-width: 901px) {
-          .mobile-menu { display: none !important; }
+        .dpbim-nav-link:hover,
+        .dpbim-nav-link.active {
+          color: #fff;
+          background: rgba(255,255,255,0.05);
         }
-        .mega-link:hover { background: rgba(255,255,255,0.05); }
+        .dpbim-nav-link .chev {
+          opacity: 0.45;
+          transition: transform 0.2s, opacity 0.15s;
+        }
+        .dpbim-nav-link:hover .chev,
+        .dpbim-nav-link.active .chev {
+          opacity: 0.8;
+          transform: rotate(180deg);
+        }
+
+        /* Mobile drawer */
+        .dpbim-mobile-drawer {
+          position: fixed; inset: 0; top: 60px;
+          background: #080c1a;
+          border-top: 1px solid rgba(255,255,255,0.06);
+          z-index: 90; overflow-y: auto;
+          padding: 16px 0 40px;
+          animation: slideDown 0.2s ease;
+        }
+        @keyframes slideDown {
+          from { opacity: 0; transform: translateY(-8px); }
+          to   { opacity: 1; transform: translateY(0);    }
+        }
+        .dpbim-mobile-section { border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .dpbim-mobile-trigger {
+          width: 100%; display: flex; align-items: center; justify-content: space-between;
+          padding: 14px 20px; background: none; border: none; cursor: pointer;
+          font-size: 14px; font-weight: 600; color: #c8d0e8;
+          font-family: 'DM Sans', sans-serif;
+        }
+        .dpbim-mobile-trigger:hover { background: rgba(255,255,255,0.03); }
+        .dpbim-mobile-items { padding: 4px 0 12px 20px; }
+        .dpbim-mobile-item {
+          display: flex; align-items: center; gap: 10px;
+          padding: 10px 16px; text-decoration: none;
+          border-radius: 8px; margin: 2px 12px 2px 0;
+          transition: background 0.15s;
+        }
+        .dpbim-mobile-item:hover { background: rgba(255,255,255,0.05); }
+        .dpbim-mobile-item-label {
+          font-size: 13.5px; font-weight: 600; color: #e2e8f0;
+          font-family: 'DM Sans', sans-serif;
+        }
+        .dpbim-mobile-item-sub {
+          font-size: 11.5px; color: #4a5a80;
+          font-family: 'DM Sans', sans-serif; margin-top: 1px;
+        }
       `}</style>
 
-      <div style={S.inner}>
-        {/* Logo */}
-        <Link href="/" style={S.logo}>
-          <div style={S.logoIcon}>⬡</div>
-          Dharren Park <span style={{ color: '#f59e0b' }}>BIM</span>
-        </Link>
+      <nav
+        ref={navRef}
+        style={{
+          position: 'sticky', top: 0, zIndex: 80,
+          background: scrolled ? 'rgba(10,14,26,0.92)' : '#0a0e1a',
+          backdropFilter: scrolled ? 'blur(20px)' : 'none',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          transition: 'background 0.25s, backdrop-filter 0.25s',
+        }}
+      >
+        {/* Gradient underline */}
+        <div style={{
+          height: 2,
+          background: 'linear-gradient(90deg, transparent 0%, #2563eb 35%, #f59e0b 65%, transparent 100%)',
+          opacity: 0.55,
+        }} />
 
-        {/* Desktop nav */}
-        <div className="nav-desktop" style={{ display: 'flex', alignItems: 'center', gap: '2px', position: 'relative' }}>
-          {NAV_ITEMS.map((item, idx) => (
-            <div key={item.label} style={{ position: 'relative' }}>
-              <button
-                style={S.navBtn(openMenu === item.label)}
-                onClick={() => setOpenMenu(openMenu === item.label ? null : item.label)}
-              >
-                {item.label}
-                <span style={S.chevron(openMenu === item.label)}>▾</span>
-              </button>
-              {openMenu === item.label && (
-                <div style={{ position: 'absolute', top: 'calc(100% + 6px)', ...getMenuStyle(idx) }}>
-                  <MegaMenu item={item} closeAll={closeAll} />
-                </div>
-              )}
+        <div style={{
+          maxWidth: 1280, margin: '0 auto',
+          padding: '0 24px',
+          height: 60,
+          display: 'flex', alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 16,
+        }}>
+
+          {/* ── Logo ── */}
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', flexShrink: 0 }}>
+            <div style={{
+              width: 30, height: 30, background: '#2563eb', borderRadius: 7,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <rect x="2" y="2" width="5" height="5" rx="1" fill="white" opacity="0.9"/>
+                <rect x="9" y="2" width="5" height="5" rx="1" fill="white" opacity="0.6"/>
+                <rect x="2" y="9" width="5" height="5" rx="1" fill="white" opacity="0.6"/>
+                <rect x="9" y="9" width="5" height="5" rx="1" fill="#f59e0b"/>
+              </svg>
             </div>
-          ))}
-        </div>
+            <span style={{
+              fontFamily: 'Syne, sans-serif', fontWeight: 700,
+              fontSize: 16, color: '#fff', letterSpacing: '-0.02em',
+            }}>
+              Dharren Park <span style={{ color: '#f59e0b' }}>BIM</span>
+            </span>
+          </Link>
 
-        {/* Right CTAs */}
-        <div style={S.navRight} className="nav-desktop">
-          {isAdmin && <Link href="/admin" style={S.btnAdmin}>⚙ Admin</Link>}
-          {isLoggedIn
-            ? <Link href="/dashboard" style={S.btnDash}>Dashboard</Link>
-            : <>
-                <Link href="/login"    style={S.btnLogin}>Log in</Link>
-                <Link href="/register" style={S.btnCta}>Get started →</Link>
+          {/* ── Desktop Nav ── */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1, justifyContent: 'center' }}
+               className="dpbim-desktop-nav">
+            {NAV_ITEMS.map(item => {
+              // Derive base path from first item in first column
+              const basePath = '/' + item.label.toLowerCase().replace(/\s+/g, '-').replace('ai-in-bim', 'ai-in-bim');
+              const isActive = pathname.startsWith(basePath);
+              return (
+              <div
+                key={item.label}
+                style={{ position: 'relative' }}
+                onMouseEnter={() => handleNavEnter(item.label)}
+                onMouseLeave={handleNavLeave}
+              >
+                <button className={`dpbim-nav-link${activeMenu === item.label || isActive ? ' active' : ''}`}
+                  style={isActive ? { color: '#fff', background: 'rgba(37,99,235,0.1)' } : {}}>
+                  {item.label}
+                  <svg className="chev" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                  {isActive && (
+                    <span style={{
+                      position: 'absolute', bottom: -1, left: '50%',
+                      transform: 'translateX(-50%)',
+                      width: 20, height: 2, borderRadius: 2,
+                      background: '#2563eb',
+                    }} />
+                  )}
+                </button>
+                {activeMenu === item.label && (
+                  <div
+                    onMouseEnter={handleDropdownEnter}
+                    onMouseLeave={handleNavLeave}
+                  >
+                    <Dropdown item={item} onClose={() => setActiveMenu(null)} />
+                  </div>
+                )}
+              </div>
+            );
+            })}
+          </div>
+
+          {/* ── Right Actions ── */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            {isAdmin && (
+              <Link href="/admin" style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '7px 14px',
+                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                borderRadius: 7,
+                fontSize: 13, fontWeight: 600,
+                color: '#0a0e1a', textDecoration: 'none',
+                fontFamily: 'DM Sans, sans-serif',
+              }}>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <circle cx="6" cy="6" r="4.5" stroke="rgba(0,0,0,0.5)" strokeWidth="1.5"/>
+                  <circle cx="6" cy="6" r="2" fill="rgba(0,0,0,0.4)"/>
+                </svg>
+                Admin
+              </Link>
+            )}
+
+            {/* Pricing — always visible, highlights when active */}
+            <Link href="/pricing" style={{
+              padding: '7px 13px', borderRadius: 7,
+              fontSize: 13, fontWeight: pathname === '/pricing' ? 600 : 500,
+              color: pathname === '/pricing' ? '#fff' : '#8b95b8',
+              textDecoration: 'none', fontFamily: 'DM Sans, sans-serif',
+              background: pathname === '/pricing' ? 'rgba(37,99,235,0.15)' : 'transparent',
+              border: pathname === '/pricing' ? '1px solid rgba(37,99,235,0.35)' : '1px solid transparent',
+              transition: 'color 0.15s, background 0.15s, border-color 0.15s',
+              position: 'relative',
+            }}
+            onMouseEnter={e => {
+              if (pathname !== '/pricing') {
+                e.currentTarget.style.color = '#fff';
+                e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+              }
+            }}
+            onMouseLeave={e => {
+              if (pathname !== '/pricing') {
+                e.currentTarget.style.color = '#8b95b8';
+                e.currentTarget.style.background = 'transparent';
+              }
+            }}
+            >
+              Pricing
+              {pathname === '/pricing' && (
+                <span style={{
+                  position: 'absolute', bottom: -1, left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: 20, height: 2, borderRadius: 2,
+                  background: '#2563eb',
+                }} />
+              )}
+            </Link>
+
+            {user ? (
+              /* ── Logged IN: Dashboard ── */
+              <Link href="/dashboard" style={{
+                padding: '7px 13px',
+                background: 'rgba(37,99,235,0.12)',
+                border: '1px solid rgba(37,99,235,0.3)',
+                borderRadius: 7,
+                fontSize: 13, fontWeight: 500, color: '#60a5fa',
+                textDecoration: 'none', fontFamily: 'DM Sans, sans-serif',
+              }}>
+                Dashboard
+              </Link>
+            ) : (
+              /* ── Logged OUT: Log in + Get Started ── */
+              <>
+                <Link href="/login" style={{
+                  padding: '7px 13px', borderRadius: 7,
+                  fontSize: 13, fontWeight: 500, color: '#8b95b8',
+                  textDecoration: 'none', fontFamily: 'DM Sans, sans-serif',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  transition: 'color 0.15s, border-color 0.15s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'; }}
+                onMouseLeave={e => { e.currentTarget.style.color = '#8b95b8'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}
+                >
+                  Log in
+                </Link>
+
+                <Link href="/register" style={{
+                  padding: '7px 14px',
+                  background: '#2563eb',
+                  borderRadius: 7,
+                  fontSize: 13, fontWeight: 600, color: '#fff',
+                  textDecoration: 'none', fontFamily: 'DM Sans, sans-serif',
+                  transition: 'background 0.15s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = '#1d4ed8'}
+                onMouseLeave={e => e.currentTarget.style.background = '#2563eb'}
+                >
+                  Get Started
+                </Link>
               </>
-          }
-        </div>
+            )}
 
-        {/* Hamburger */}
-        <button
-          className="hamburger-btn"
-          style={{ ...S.hamburger, display: 'none' }}
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle menu"
-        >
-          <div style={S.bar(mobileOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none')} />
-          <div style={{ ...S.bar('none'), opacity: mobileOpen ? 0 : 1 }} />
-          <div style={S.bar(mobileOpen ? 'rotate(-45deg) translate(5px, -5px)' : 'none')} />
-        </button>
-      </div>
-
-      {/* Mobile menu */}
-      {mobileOpen && (
-        <div className="mobile-menu" style={S.mobileMenu}>
-          {NAV_ITEMS.map((item) => (
-            <div key={item.label} style={S.mobileSection}>
-              <button
-                style={S.mobileSectionBtn}
-                onClick={() => setMobileExpand(mobileExpand === item.label ? null : item.label)}
-              >
-                <span>{item.label}</span>
-                <span style={{ fontSize: '12px', opacity: 0.4, transition: 'transform 0.2s', display: 'inline-block', transform: mobileExpand === item.label ? 'rotate(180deg)' : 'none' }}>▾</span>
-              </button>
-              {mobileExpand === item.label && (
-                <div style={{ paddingLeft: '4px' }}>
-                  {item.columns.map((col, ci) => (
-                    <div key={ci}>
-                      {col.title && (
-                        <div style={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.6px', color: '#3a4455', padding: '4px 12px 4px' }}>{col.title}</div>
-                      )}
-                      {col.links.map((link) => (
-                        <Link
-                          key={link.href}
-                          href={link.href}
-                          onClick={closeAll}
-                          style={S.mobileSubLink}
-                          onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
-                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                        >
-                          <span style={{ marginRight: '8px', opacity: 0.5 }}>{link.icon}</span>
-                          {link.label}
-                          {link.badge && <span style={{ ...S.badge(link.badgeColor), marginLeft: '8px' }}>{link.badge}</span>}
-                        </Link>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-
-          {/* Mobile auth CTAs */}
-          <div style={S.mobileCtas}>
-            {isAdmin && <Link href="/admin" onClick={closeAll} style={{ ...S.btnAdmin, flex: 1, textAlign: 'center' }}>⚙ Admin</Link>}
-            {isLoggedIn
-              ? <Link href="/dashboard" onClick={closeAll} style={{ ...S.btnDash, flex: 1, textAlign: 'center' }}>Dashboard</Link>
-              : <>
-                  <Link href="/login"    onClick={closeAll} style={{ ...S.btnLogin, flex: 1, textAlign: 'center' }}>Log in</Link>
-                  <Link href="/register" onClick={closeAll} style={{ ...S.btnCta,   flex: 1, textAlign: 'center' }}>Get started →</Link>
-                </>
-            }
+            {/* Mobile burger */}
+            <button
+              onClick={() => setMobileOpen(o => !o)}
+              style={{
+                display: 'none',
+                width: 36, height: 36, borderRadius: 7,
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', color: '#8b95b8',
+              }}
+              className="dpbim-burger"
+              aria-label="Toggle menu"
+            >
+              {mobileOpen
+                ? <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 4L14 14M14 4L4 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                : <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+              }
+            </button>
           </div>
         </div>
-      )}
-    </nav>
+
+        {/* ── Mobile Drawer ── */}
+        {mobileOpen && (
+          <div className="dpbim-mobile-drawer">
+            {NAV_ITEMS.map(item => (
+              <div key={item.label} className="dpbim-mobile-section">
+                <button
+                  className="dpbim-mobile-trigger"
+                  onClick={() => setMobileExpanded(e => e === item.label ? null : item.label)}
+                >
+                  <span>{item.label}</span>
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                    style={{ transform: mobileExpanded === item.label ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', color: '#4a5a80' }}>
+                    <path d="M3 5L7 9L11 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                </button>
+                {mobileExpanded === item.label && (
+                  <div className="dpbim-mobile-items">
+                    {item.columns.flatMap(col => col.items).map((link, i) => (
+                      <Link key={i} href={link.href} className="dpbim-mobile-item"
+                        onClick={() => { setMobileOpen(false); setMobileExpanded(null); }}>
+                        <div style={{
+                          width: 28, height: 28, borderRadius: 6, flexShrink: 0,
+                          background: 'rgba(255,255,255,0.04)',
+                          border: '1px solid rgba(255,255,255,0.07)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          color: '#5a6fa8',
+                        }}>
+                          <NavIcon type={link.icon} />
+                        </div>
+                        <div>
+                          <div className="dpbim-mobile-item-label">{link.label}</div>
+                          <div className="dpbim-mobile-item-sub">{link.sub}</div>
+                        </div>
+                        {link.badge && <Badge text={link.badge} color={link.badgeColor || 'amber'} />}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {/* Mobile auth */}
+            <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <Link href="/pricing" style={{ textAlign: 'center', padding: '11px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', fontSize: 14, fontWeight: 500, color: '#8b95b8', textDecoration: 'none', fontFamily: 'DM Sans, sans-serif' }}>
+                Pricing
+              </Link>
+              {user ? (
+                <Link href="/dashboard" style={{ textAlign: 'center', padding: '11px', borderRadius: 8, background: 'rgba(37,99,235,0.12)', border: '1px solid rgba(37,99,235,0.3)', fontSize: 14, fontWeight: 600, color: '#60a5fa', textDecoration: 'none', fontFamily: 'DM Sans, sans-serif' }}>
+                  Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link href="/login" style={{ textAlign: 'center', padding: '11px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', fontSize: 14, fontWeight: 500, color: '#8b95b8', textDecoration: 'none', fontFamily: 'DM Sans, sans-serif' }}>
+                    Log in
+                  </Link>
+                  <Link href="/register" style={{ textAlign: 'center', padding: '11px', borderRadius: 8, background: '#2563eb', fontSize: 14, fontWeight: 600, color: '#fff', textDecoration: 'none', fontFamily: 'DM Sans, sans-serif' }}>
+                    Get Started
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </nav>
+
+      {/* ── Responsive: hide desktop nav / show burger on mobile ── */}
+      <style>{`
+        @media (max-width: 900px) {
+          .dpbim-desktop-nav { display: none !important; }
+          .dpbim-burger { display: flex !important; }
+        }
+      `}</style>
+    </>
   );
 }

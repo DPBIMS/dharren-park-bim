@@ -15,6 +15,14 @@ export default function RevitQuizClient({ quiz, lesson }) {
   const [result,       setResult]       = useState(null);
   const [saving,       setSaving]       = useState(false);
 
+  const normalizedQuestions = quiz.questions.map((q, i) => {
+    let correct = q.correct !== undefined ? q.correct : q.answer;
+    if (q.type === 'mcq' && typeof correct === 'string') {
+      correct = q.options.indexOf(correct);
+    }
+    return { ...q, id: q.id || `q${i + 1}`, correct };
+  });
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (!data?.user) { router.push('/login'); return; }
@@ -23,8 +31,8 @@ export default function RevitQuizClient({ quiz, lesson }) {
     });
   }, [router]);
 
-  const totalQuestions = quiz.questions.length;
-  const question       = quiz.questions[current];
+  const totalQuestions = normalizedQuestions.length;
+  const question       = normalizedQuestions[current];
   const isLast         = current === totalQuestions - 1;
   const isAnswered     = question?.type === 'fillblank'
     ? fillValue.trim() !== ''
@@ -56,7 +64,7 @@ export default function RevitQuizClient({ quiz, lesson }) {
     }
 
     let correctCount = 0;
-    quiz.questions.forEach(q => {
+    normalizedQuestions.forEach(q => {
       const ua = finalAnswers[q.id];
       if (q.type === 'mcq')       { if (ua === q.correct) correctCount++; }
       else if (q.type === 'truefalse') { if (ua === q.correct) correctCount++; }
@@ -219,7 +227,7 @@ export default function RevitQuizClient({ quiz, lesson }) {
                 Retake Quiz
               </button>
               {result.passed && lesson.next ? (
-                <Link href={`/software/revit/getting-started/${lesson.next.id}`} style={{ padding: '.75rem 1.5rem', borderRadius: '8px', background: '#2563eb', color: '#fff', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>
+                <Link href={`/software/revit/getting-started/${typeof lesson.next === 'string' ? lesson.next : lesson.next.id}`} style={{ padding: '.75rem 1.5rem', borderRadius: '8px', background: '#2563eb', color: '#fff', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>
                   Next Lesson →
                 </Link>
               ) : (

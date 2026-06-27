@@ -32,6 +32,23 @@ export default function RevitLessonClient({ lesson, allLessons }) {
   const [activeSection, setActiveSection] = useState(lesson.sections?.[0]?.id || '');
   const [authChecked,   setAuthChecked]   = useState(false);
 
+  const normalizedSections = lesson.sections?.map((s, i) => ({
+    ...s,
+    id: s.id || `s${i + 1}`,
+    heading: s.heading || s.title,
+  })) || [];
+
+  const normalizeNav = (nav) => {
+    if (!nav) return null;
+    if (typeof nav === 'string') {
+      const found = allLessons.find(l => l.id === nav);
+      return found ? { id: nav, title: found.title } : { id: nav, title: '' };
+    }
+    return nav;
+  };
+  const prevNav = normalizeNav(lesson.prev);
+  const nextNav = normalizeNav(lesson.next);
+
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -87,7 +104,7 @@ export default function RevitLessonClient({ lesson, allLessons }) {
 
   const tc = topicColors[lesson.topic] || topicColors.general;
   const cc = catColors[lesson.cat] || catColors.beginner;
-  const nextLesson = lesson.next ? allLessons.find(l => l.id === lesson.next.id) : null;
+  const nextLesson = nextNav ? allLessons.find(l => l.id === nextNav.id) : null;
   const nextIsLocked = planLoaded && nextLesson && !canAccess(nextLesson);
 
   return (
@@ -127,7 +144,7 @@ export default function RevitLessonClient({ lesson, allLessons }) {
 
           {/* Sections */}
           <div style={{ maxWidth: '720px' }}>
-            {lesson.sections?.map(section => (
+            {normalizedSections.map(section => (
               <div key={section.id} id={section.id} style={{ marginBottom: '2.5rem' }}>
                 <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '1.35rem', marginBottom: '1rem', color: '#e8eaf0' }}>{section.heading}</h2>
 
@@ -210,24 +227,24 @@ export default function RevitLessonClient({ lesson, allLessons }) {
 
             {/* Prev/Next navigation */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '2rem' }}>
-              {lesson.prev ? (
-                <Link href={`/software/revit/getting-started/${lesson.prev.id}`} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '1rem 1.25rem', textDecoration: 'none', display: 'block' }}>
+              {prevNav ? (
+                <Link href={`/software/revit/getting-started/${prevNav.id}`} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '1rem 1.25rem', textDecoration: 'none', display: 'block' }}>
                   <div style={{ fontSize: '11px', color: '#8892a4', marginBottom: '.3rem' }}>← Previous</div>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#e8eaf0' }}>{lesson.prev.title}</div>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#e8eaf0' }}>{prevNav.title}</div>
                 </Link>
               ) : <div />}
 
-              {lesson.next ? (
+              {nextNav ? (
                 nextIsLocked ? (
                   <Link href="/pricing" style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '12px', padding: '1rem 1.25rem', textDecoration: 'none', display: 'block' }}>
                     <div style={{ fontSize: '11px', color: '#f59e0b', marginBottom: '.3rem' }}>🔒 Upgrade to unlock</div>
-                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#8892a4' }}>{lesson.next.title}</div>
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#8892a4' }}>{nextNav.title}</div>
                     <div style={{ fontSize: '11px', color: '#f59e0b', marginTop: '4px' }}>View Plans →</div>
                   </Link>
                 ) : (
-                  <Link href={`/software/revit/getting-started/${lesson.next.id}`} style={{ background: 'rgba(37,99,235,0.06)', border: '1px solid rgba(37,99,235,0.2)', borderRadius: '12px', padding: '1rem 1.25rem', textDecoration: 'none', display: 'block' }}>
+                  <Link href={`/software/revit/getting-started/${nextNav.id}`} style={{ background: 'rgba(37,99,235,0.06)', border: '1px solid rgba(37,99,235,0.2)', borderRadius: '12px', padding: '1rem 1.25rem', textDecoration: 'none', display: 'block' }}>
                     <div style={{ fontSize: '11px', color: '#3b82f6', marginBottom: '.3rem' }}>Next →</div>
-                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#e8eaf0' }}>{lesson.next.title}</div>
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#e8eaf0' }}>{nextNav.title}</div>
                   </Link>
                 )
               ) : (
@@ -244,11 +261,11 @@ export default function RevitLessonClient({ lesson, allLessons }) {
         <div style={{ position: 'sticky', top: 'calc(64px + 48px + 1.5rem)', alignSelf: 'start', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
           {/* Table of contents */}
-          {lesson.sections?.length > 0 && (
+          {normalizedSections.length > 0 && (
             <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '1.25rem' }}>
               <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1px', color: '#6b7280', textTransform: 'uppercase', marginBottom: '.75rem' }}>📋 In This Lesson</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                {lesson.sections.map(s => (
+                {normalizedSections.map(s => (
                   <div
                     key={s.id}
                     onClick={() => { setActiveSection(s.id); document.getElementById(s.id)?.scrollIntoView({ behavior: 'smooth' }); }}
@@ -281,9 +298,9 @@ export default function RevitLessonClient({ lesson, allLessons }) {
           {lesson.resource && (
             <div style={{ background: 'rgba(37,99,235,0.06)', border: '1px solid rgba(37,99,235,0.15)', borderRadius: '12px', padding: '1.25rem' }}>
               <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1px', color: '#6b7280', textTransform: 'uppercase', marginBottom: '.5rem' }}>📄 Lesson Resource</div>
-              <div style={{ fontSize: '12px', color: '#8892a4', marginBottom: '.75rem' }}>Download the {lesson.resource.label} for this lesson.</div>
+              <div style={{ fontSize: '12px', color: '#8892a4', marginBottom: '.75rem' }}>Download the {lesson.resource.label || lesson.resource.title} for this lesson.</div>
               <button style={{ width: '100%', background: '#2563eb', color: '#fff', border: 'none', padding: '8px', borderRadius: '7px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" }}>
-                Download {lesson.resource.type} ↓
+                Download {lesson.resource.type || 'PDF'} ↓
               </button>
             </div>
           )}

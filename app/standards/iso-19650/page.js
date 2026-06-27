@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import {revitLessons} from '@/lib/revitLessonsData';
+import { isoLessons } from '@/lib/isoLessonsData';
 
 const PLAN_ACCESS = {
   free:    (l) => l.free,
@@ -12,8 +12,8 @@ const PLAN_ACCESS = {
 };
 
 const tagStyle = {
-  revit:        { bg:'rgba(37,99,235,0.12)',  color:'#60a5fa', border:'rgba(37,99,235,0.2)'  },
   standards:    { bg:'rgba(139,92,246,0.12)', color:'#a78bfa', border:'rgba(139,92,246,0.2)' },
+  revit:        { bg:'rgba(37,99,235,0.12)',  color:'#60a5fa', border:'rgba(37,99,235,0.2)'  },
   coordination: { bg:'rgba(20,184,166,0.12)', color:'#2dd4bf', border:'rgba(20,184,166,0.2)' },
   general:      { bg:'rgba(107,114,128,0.12)',color:'#9ca3af', border:'rgba(107,114,128,0.2)' },
 };
@@ -26,7 +26,7 @@ const catColor = {
 
 function getPlanRequired(lesson) {
   if (lesson.free) return 'free';
-  if (lesson.cat === 'beginner') return 'basic';
+  if (lesson.cat === 'beginner')     return 'basic';
   if (lesson.cat === 'intermediate') return 'pro';
   return 'premium';
 }
@@ -39,13 +39,13 @@ const planBadgeStyle = {
   premium: { bg:'rgba(245,158,11,0.1)', c:'#f59e0b' },
 };
 
-export default function RevitGettingStartedPage() {
-  const [activePlan,   setActivePlan]   = useState('free');
-  const [completed,    setCompleted]    = useState(new Set());
-  const [loading,      setLoading]      = useState(true);
-  const [activeCat,    setActiveCat]    = useState('all');
-  const [activeTopic,  setActiveTopic]  = useState('all');
-  const [search,       setSearch]       = useState('');
+export default function ISOCoursePage() {
+  const [activePlan,  setActivePlan]  = useState('free');
+  const [completed,   setCompleted]   = useState(new Set());
+  const [loading,     setLoading]     = useState(true);
+  const [activeCat,   setActiveCat]   = useState('all');
+  const [activeTopic, setActiveTopic] = useState('all');
+  const [search,      setSearch]      = useState('');
 
   useEffect(() => {
     async function load() {
@@ -77,15 +77,18 @@ export default function RevitGettingStartedPage() {
     return checker(lesson);
   }
 
-  const filtered = revitLessons.filter(l => {
+  const filtered = isoLessons.filter(l => {
     const matchCat    = activeCat   === 'all' || l.cat   === activeCat;
     const matchTopic  = activeTopic === 'all' || l.topic === activeTopic;
     const matchSearch = !search || l.title.toLowerCase().includes(search.toLowerCase()) || l.desc.toLowerCase().includes(search.toLowerCase());
     return matchCat && matchTopic && matchSearch;
   });
 
-  const unlockedCount  = revitLessons.filter(l => canAccess(l)).length;
-  const completedCount = revitLessons.filter(l => completed.has(l.id)).length;
+  const unlockedCount  = isoLessons.filter(l => canAccess(l)).length;
+  const completedCount = isoLessons.filter(l => completed.has(l.id)).length;
+
+  // Unique topics for topic tabs
+  const topics = [...new Set(isoLessons.map(l => l.topic))];
 
   return (
     <main style={{ background:'#0a0e1a', color:'#e8eaf0', minHeight:'100vh', paddingTop:'80px', fontFamily:"'DM Sans',sans-serif" }}>
@@ -95,28 +98,28 @@ export default function RevitGettingStartedPage() {
         <div style={{ fontSize:'12px', color:'#8892a4', marginBottom:'1.5rem', display:'flex', alignItems:'center', gap:'.5rem' }}>
           <Link href="/" style={{ color:'#8892a4', textDecoration:'none' }}>Home</Link>
           <span>›</span>
-          <Link href="/software" style={{ color:'#8892a4', textDecoration:'none' }}>Software</Link>
+          <Link href="/standards" style={{ color:'#8892a4', textDecoration:'none' }}>Standards</Link>
           <span>›</span>
-          <span style={{ color:'#e8eaf0' }}>Revit — Getting Started</span>
+          <span style={{ color:'#e8eaf0' }}>ISO 19650</span>
         </div>
 
         {/* Header */}
         <div style={{ marginBottom:'2.5rem' }}>
-          <div style={{ fontSize:'11px', fontWeight:500, letterSpacing:'2px', textTransform:'uppercase', color:'#3b82f6', marginBottom:'.5rem' }}>Software · Revit</div>
-          <h1 style={{ fontFamily:"'Syne',sans-serif", fontSize:'2.2rem', fontWeight:800, letterSpacing:'-.5px', marginBottom:'.5rem' }}>Getting Started with Revit</h1>
-          <p style={{ color:'#8892a4', fontSize:'15px' }}>The most comprehensive Revit course in the Philippines. Master Revit the right way, from the ground up.</p>
+          <div style={{ fontSize:'11px', fontWeight:500, letterSpacing:'2px', textTransform:'uppercase', color:'#a78bfa', marginBottom:'.5rem' }}>Standards · ISO 19650</div>
+          <h1 style={{ fontFamily:"'Syne',sans-serif", fontSize:'2.2rem', fontWeight:800, letterSpacing:'-.5px', marginBottom:'.5rem' }}>ISO 19650 Standards Course</h1>
+          <p style={{ color:'#8892a4', fontSize:'15px' }}>The most comprehensive ISO 19650 course in the Philippines. Master information management across the full built asset life cycle.</p>
         </div>
 
         {/* Plan access banner */}
         {!loading && activePlan !== 'free' && (
-          <div style={{ background:'rgba(37,99,235,0.06)', border:'1px solid rgba(37,99,235,0.2)', borderRadius:'10px', padding:'.75rem 1.25rem', marginBottom:'1.5rem', fontSize:'13px', color:'#93c5fd', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-            <span>✓ Logged in as <strong style={{ textTransform:'capitalize' }}>{activePlan} Plan</strong> — {unlockedCount} of {revitLessons.length} lessons unlocked · {completedCount} completed</span>
-            <Link href="/dashboard" style={{ color:'#3b82f6', fontSize:'12px', fontWeight:500, textDecoration:'none' }}>Go to Dashboard →</Link>
+          <div style={{ background:'rgba(139,92,246,0.06)', border:'1px solid rgba(139,92,246,0.2)', borderRadius:'10px', padding:'.75rem 1.25rem', marginBottom:'1.5rem', fontSize:'13px', color:'#c4b5fd', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <span>✓ Logged in as <strong style={{ textTransform:'capitalize' }}>{activePlan} Plan</strong> — {unlockedCount} of {isoLessons.length} lessons unlocked · {completedCount} completed</span>
+            <Link href="/dashboard" style={{ color:'#a78bfa', fontSize:'12px', fontWeight:500, textDecoration:'none' }}>Go to Dashboard →</Link>
           </div>
         )}
         {!loading && activePlan === 'free' && (
           <div style={{ background:'rgba(245,158,11,0.06)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:'10px', padding:'.75rem 1.25rem', marginBottom:'1.5rem', fontSize:'13px', color:'#fbbf24', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-            <span>🔒 You have access to {revitLessons.filter(l=>l.free).length} free lessons. Upgrade to unlock the full Revit course.</span>
+            <span>🔒 You have access to {isoLessons.filter(l => l.free).length} free lessons. Upgrade to unlock the full ISO 19650 course.</span>
             <Link href="/pricing" style={{ color:'#f59e0b', fontSize:'12px', fontWeight:600, textDecoration:'none' }}>Upgrade Now →</Link>
           </div>
         )}
@@ -126,32 +129,45 @@ export default function RevitGettingStartedPage() {
           <div style={{ display:'flex', flexWrap:'wrap', gap:'.5rem' }}>
             {[['all','All Levels'],['beginner','Beginner'],['intermediate','Intermediate'],['advanced','Advanced']].map(([val,label]) => (
               <button key={val} onClick={() => setActiveCat(val)} style={{
-                background: activeCat===val
-                  ? val==='beginner'?'rgba(34,197,94,0.12)':val==='intermediate'?'rgba(245,158,11,0.12)':val==='advanced'?'rgba(239,68,68,0.12)':'rgba(37,99,235,0.15)'
+                background: activeCat === val
+                  ? val==='beginner'    ? 'rgba(34,197,94,0.12)'
+                  : val==='intermediate'? 'rgba(245,158,11,0.12)'
+                  : val==='advanced'    ? 'rgba(239,68,68,0.12)'
+                  :                       'rgba(139,92,246,0.15)'
                   : 'rgba(255,255,255,0.04)',
-                border: `1px solid ${activeCat===val
-                  ? val==='beginner'?'rgba(34,197,94,0.3)':val==='intermediate'?'rgba(245,158,11,0.3)':val==='advanced'?'rgba(239,68,68,0.3)':'rgba(37,99,235,0.4)'
+                border:`1px solid ${activeCat === val
+                  ? val==='beginner'    ? 'rgba(34,197,94,0.3)'
+                  : val==='intermediate'? 'rgba(245,158,11,0.3)'
+                  : val==='advanced'    ? 'rgba(239,68,68,0.3)'
+                  :                       'rgba(139,92,246,0.4)'
                   : 'rgba(255,255,255,0.08)'}`,
                 borderRadius:'100px', padding:'6px 16px', fontSize:'13px', cursor:'pointer', fontFamily:"'DM Sans',sans-serif",
-                color: activeCat===val
-                  ? val==='beginner'?'#4ade80':val==='intermediate'?'#fbbf24':val==='advanced'?'#f87171':'#fff'
+                color: activeCat === val
+                  ? val==='beginner'    ? '#4ade80'
+                  : val==='intermediate'? '#fbbf24'
+                  : val==='advanced'    ? '#f87171'
+                  :                       '#fff'
                   : '#8892a4',
               }}>{label}</button>
             ))}
           </div>
-          <input type="text" placeholder="🔍  Search lessons..." value={search} onChange={e => setSearch(e.target.value)}
+          <input
+            type="text"
+            placeholder="🔍  Search lessons..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
             style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'8px', padding:'8px 14px', color:'#e8eaf0', fontSize:'13px', fontFamily:"'DM Sans',sans-serif", outline:'none', width:'220px' }}
           />
         </div>
 
         {/* Topic tabs */}
         <div style={{ display:'flex', flexWrap:'wrap', gap:'.4rem', marginBottom:'1.5rem' }}>
-          {[['all','All Topics'],['revit','Revit']].map(([val,label]) => (
+          {[['all','All Topics'], ...topics.map(t => [t, t])].map(([val, label]) => (
             <button key={val} onClick={() => setActiveTopic(val)} style={{
-              background: activeTopic===val?'rgba(255,255,255,0.06)':'transparent',
-              border: `1px solid ${activeTopic===val?'rgba(255,255,255,0.15)':'rgba(255,255,255,0.08)'}`,
+              background: activeTopic === val ? 'rgba(255,255,255,0.06)' : 'transparent',
+              border:`1px solid ${activeTopic === val ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)'}`,
               borderRadius:'6px', padding:'4px 12px', fontSize:'12px',
-              color: activeTopic===val?'#e8eaf0':'#8892a4',
+              color: activeTopic === val ? '#e8eaf0' : '#8892a4',
               cursor:'pointer', fontFamily:"'DM Sans',sans-serif",
             }}>{label}</button>
           ))}
@@ -160,15 +176,12 @@ export default function RevitGettingStartedPage() {
         {/* Stats */}
         <div style={{ display:'flex', gap:'1.5rem', marginBottom:'2rem', flexWrap:'wrap', alignItems:'center', fontSize:'13px', color:'#8892a4' }}>
           <span><strong style={{ color:'#e8eaf0' }}>{filtered.length}</strong> lessons</span>
-          <span style={{ width:'4px', height:'4px', borderRadius:'50%', background:'rgba(255,255,255,0.08)', display:'inline-block' }}/>
-          <span><strong style={{ color:'#e8eaf0' }}>{revitLessons.filter(l=>l.free).length}</strong> free previews</span>
-          <span style={{ width:'4px', height:'4px', borderRadius:'50%', background:'rgba(255,255,255,0.08)', display:'inline-block' }}/>
+          <span style={{ width:'4px', height:'4px', borderRadius:'50%', background:'rgba(255,255,255,0.08)', display:'inline-block' }} />
+          <span><strong style={{ color:'#e8eaf0' }}>{isoLessons.filter(l => l.free).length}</strong> free previews</span>
+          <span style={{ width:'4px', height:'4px', borderRadius:'50%', background:'rgba(255,255,255,0.08)', display:'inline-block' }} />
+          <span>Parts <strong style={{ color:'#e8eaf0' }}>1–5</strong> covered</span>
+          <span style={{ width:'4px', height:'4px', borderRadius:'50%', background:'rgba(255,255,255,0.08)', display:'inline-block' }} />
           <span>Updated <strong style={{ color:'#e8eaf0' }}>June 2026</strong></span>
-          {revitLessons.length < 24 && (
-            <span style={{ marginLeft:'auto', background:'rgba(245,158,11,0.08)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:'100px', padding:'3px 12px', fontSize:'11px', color:'#f59e0b', fontWeight:600 }}>
-              • {24 - revitLessons.length} more lessons coming soon
-            </span>
-          )}
         </div>
 
         {/* Lesson Grid */}
@@ -180,61 +193,64 @@ export default function RevitGettingStartedPage() {
         ) : (
           <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'1.25rem' }}>
             {filtered.map(l => {
-              const ts         = tagStyle[l.topic] || tagStyle.general;
+              const ts         = tagStyle[l.topic] || tagStyle.standards;
               const cs         = catColor[l.cat]   || catColor.beginner;
               const accessible = canAccess(l);
               const isDone     = completed.has(l.id);
               const planReq    = getPlanRequired(l);
               const pb         = planBadgeStyle[planReq];
+
               return (
-                <div key={l.id} style={{ background:'rgba(255,255,255,0.04)', border:`1px solid ${isDone?'rgba(34,197,94,0.2)':accessible?'rgba(255,255,255,0.08)':'rgba(255,255,255,0.05)'}`, borderRadius:'14px', overflow:'hidden', display:'flex', flexDirection:'column', opacity:accessible?1:0.75 }}>
+                <div key={l.id} style={{ background:'rgba(255,255,255,0.04)', border:`1px solid ${isDone ? 'rgba(34,197,94,0.2)' : accessible ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.05)'}`, borderRadius:'14px', overflow:'hidden', display:'flex', flexDirection:'column', opacity: accessible ? 1 : 0.75 }}>
                   <div style={{ padding:'1.25rem 1.25rem .75rem', flex:1 }}>
+
+                    {/* Tags row */}
                     <div style={{ display:'flex', alignItems:'center', gap:'.4rem', marginBottom:'.75rem', flexWrap:'wrap' }}>
-                      <span style={{ fontSize:'11px', fontWeight:500, padding:'3px 10px', borderRadius:'5px', background:ts.bg, color:ts.color, border:`1px solid ${ts.border}` }}>Revit</span>
+                      <span style={{ fontSize:'11px', fontWeight:500, padding:'3px 10px', borderRadius:'5px', background:ts.bg, color:ts.color, border:`1px solid ${ts.border}` }}>ISO 19650</span>
                       <span style={{ fontSize:'10px', fontWeight:600, padding:'2px 8px', borderRadius:'4px', background:cs.bg, color:cs.c, textTransform:'uppercase', letterSpacing:'.5px' }}>{l.cat}</span>
-                      {l.free && <span style={{ fontSize:'10px', fontWeight:600, padding:'2px 8px', borderRadius:'4px', background:'rgba(34,197,94,0.1)', color:'#4ade80', border:'1px solid rgba(34,197,94,0.2)' }}>FREE</span>}
-                      {isDone && <span style={{ fontSize:'10px', fontWeight:600, padding:'2px 8px', borderRadius:'4px', background:'rgba(34,197,94,0.1)', color:'#4ade80' }}>✓ Done</span>}
+                      {l.free && (
+                        <span style={{ fontSize:'10px', fontWeight:600, padding:'2px 8px', borderRadius:'4px', background:'rgba(34,197,94,0.1)', color:'#4ade80', border:'1px solid rgba(34,197,94,0.2)' }}>FREE</span>
+                      )}
+                      {isDone && (
+                        <span style={{ fontSize:'10px', fontWeight:600, padding:'2px 8px', borderRadius:'4px', background:'rgba(34,197,94,0.1)', color:'#4ade80' }}>✓ Done</span>
+                      )}
                     </div>
-                    <div style={{ fontSize:'11px', color:'#8892a4', marginBottom:'.4rem' }}>Lesson {l.num}</div>
+
+                    {/* Lesson number */}
+                    <div style={{ fontSize:'11px', color:'#8892a4', marginBottom:'.4rem' }}>Lesson {String(l.num).padStart(2,'0')}</div>
+
+                    {/* Title */}
                     <div style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:'15px', lineHeight:'1.35', marginBottom:'.5rem' }}>{l.title}</div>
-                    {accessible && <div style={{ fontSize:'13px', color:'#8892a4', lineHeight:'1.65' }}>{l.desc}</div>}
-                    {!accessible && (
-                      <div style={{ display:'flex', alignItems:'center', gap:'6px', marginTop:'.25rem' }}>
-                        <span style={{ fontSize:'11px', fontWeight:600, padding:'2px 9px', borderRadius:'100px', background:pb.bg, color:pb.c }}>{planLabel[planReq]}</span>
-                        <span style={{ fontSize:'12px', color:'#6b7280' }}>required to unlock</span>
-                      </div>
-                    )}
+
+                    {/* Description or lock */}
+                    {accessible
+                      ? <div style={{ fontSize:'13px', color:'#8892a4', lineHeight:'1.65' }}>{l.desc}</div>
+                      : (
+                        <div style={{ display:'flex', alignItems:'center', gap:'6px', marginTop:'.25rem' }}>
+                          <span style={{ fontSize:'11px', fontWeight:600, padding:'2px 9px', borderRadius:'100px', background:pb.bg, color:pb.c }}>{planLabel[planReq]}</span>
+                          <span style={{ fontSize:'12px', color:'#6b7280' }}>required to unlock</span>
+                        </div>
+                      )
+                    }
                   </div>
 
-                  {/* Footer */}
+                  {/* Card footer */}
                   <div style={{ padding:'.75rem 1.25rem', borderTop:'1px solid rgba(255,255,255,0.06)', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                    <span style={{ fontSize:'11px', color:'#8892a4' }}>⏱ {l.readTime}{l.quiz ? ' · 📝 Quiz' : ''}</span>
+                    <span style={{ fontSize:'11px', color:'#8892a4' }}>⏱ {l.readTime} · 📝 Quiz</span>
                     {accessible ? (
-                      <Link href={`/software/revit/getting-started/${l.id}`} style={{ fontSize:'12px', color:'#3b82f6', fontWeight:500, textDecoration:'none', display:'flex', alignItems:'center', gap:'4px' }}>
+                      <Link href={`/standards/iso-19650/${l.id}`} style={{ fontSize:'12px', color:'#a78bfa', fontWeight:500, textDecoration:'none', display:'flex', alignItems:'center', gap:'4px' }}>
                         {isDone ? '✓ Review' : 'Read lesson'} <span>→</span>
                       </Link>
                     ) : (
                       <div style={{ display:'flex', alignItems:'center', gap:'.5rem' }}>
                         <span>🔒</span>
-                        <Link href="/pricing" style={{ fontSize:'12px', color:'#3b82f6', textDecoration:'none' }}>View Plans</Link>
+                        <Link href="/pricing" style={{ fontSize:'12px', color:'#a78bfa', textDecoration:'none' }}>View Plans</Link>
                       </div>
                     )}
                   </div>
                 </div>
               );
             })}
-          </div>
-        )}
-
-        {/* Coming soon placeholder cards */}
-        {revitLessons.length < 24 && activeCat === 'all' && !search && (
-          <div style={{ marginTop:'1.25rem', display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'1.25rem' }}>
-            {Array.from({ length: Math.min(3, 24 - revitLessons.length) }).map((_, i) => (
-              <div key={i} style={{ background:'rgba(255,255,255,0.02)', border:'1px dashed rgba(255,255,255,0.06)', borderRadius:'14px', padding:'1.25rem', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'160px', textAlign:'center', gap:'.5rem' }}>
-                <div style={{ fontSize:'11px', fontWeight:600, padding:'2px 10px', borderRadius:'100px', background:'rgba(245,158,11,0.08)', border:'1px solid rgba(245,158,11,0.15)', color:'#f59e0b' }}>Coming Soon</div>
-                <div style={{ fontSize:'12px', color:'#4a5568' }}>More lessons in development</div>
-              </div>
-            ))}
           </div>
         )}
 
