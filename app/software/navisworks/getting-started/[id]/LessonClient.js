@@ -257,7 +257,7 @@ export default function NavisworksLessonClient({ lesson, allLessons }) {
   const nextIsLocked = planLoaded && nextLesson && !canAccess(nextLesson);
 
   return (
-    <div style={{ paddingTop: '64px', fontFamily: "'DM Sans',sans-serif" }}>
+    <div style={{ fontFamily: "'DM Sans',sans-serif" }}>
 
       {/* Top bar */}
       <div style={{ position: 'fixed', top: '64px', left: 0, right: 0, zIndex: 90, background: 'rgba(10,14,26,0.95)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.07)', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.5rem' }}>
@@ -275,7 +275,7 @@ export default function NavisworksLessonClient({ lesson, allLessons }) {
       </div>
 
       {/* Layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', maxWidth: '1200px', margin: '0 auto', padding: '2rem 1.5rem 4rem', gap: '2.5rem', paddingTop: 'calc(48px + 2rem)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', maxWidth: '1200px', margin: '0 auto', padding: '2rem 1.5rem 4rem', gap: '2.5rem', paddingTop: 'calc(48px + 1rem)' }}>
 
         {/* Main content */}
         <div>
@@ -439,16 +439,8 @@ export default function NavisworksLessonClient({ lesson, allLessons }) {
             </div>
           </div>
 
-          {/* Resource */}
-          {lesson.resource && (
-            <div style={{ background: 'rgba(37,99,235,0.06)', border: '1px solid rgba(37,99,235,0.15)', borderRadius: '12px', padding: '1.25rem' }}>
-              <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1px', color: '#6b7280', textTransform: 'uppercase', marginBottom: '.5rem' }}>📄 Lesson Resource</div>
-              <div style={{ fontSize: '12px', color: '#8892a4', marginBottom: '.75rem' }}>Download the {lesson.resource.label || lesson.resource.title} for this lesson.</div>
-              <button style={{ width: '100%', background: '#2563eb', color: '#fff', border: 'none', padding: '8px', borderRadius: '7px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" }}>
-                Download {lesson.resource.type || 'PDF'} ↓
-              </button>
-            </div>
-          )}
+          {/* Resource — hidden for now, pending a decision on whether lesson
+              content should be downloadable (content/IP safety) */}
         </div>
       </div>
     </div>
