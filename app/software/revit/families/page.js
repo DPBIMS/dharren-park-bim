@@ -57,6 +57,7 @@ export default function RevitFamilyCreationPage() {
   const [completed,   setCompleted]   = useState(new Set());
   const [loading,     setLoading]     = useState(true);
   const [activeCat,   setActiveCat]   = useState('all');
+  const [activeTopic, setActiveTopic] = useState('all');
   const [search,      setSearch]      = useState('');
 
   useEffect(() => {
@@ -90,15 +91,19 @@ export default function RevitFamilyCreationPage() {
   }
 
   const filtered = revitFamilyLessons.filter(l => {
-    const matchCat    = activeCat === 'all' || l.cat === activeCat;
+    const matchCat    = activeCat   === 'all' || l.cat   === activeCat;
+    const matchTopic  = activeTopic === 'all' || l.topic === activeTopic;
     const matchSearch = !search ||
       l.title.toLowerCase().includes(search.toLowerCase()) ||
       l.desc.toLowerCase().includes(search.toLowerCase());
-    return matchCat && matchSearch;
+    return matchCat && matchTopic && matchSearch;
   });
 
-  const unlockedCount  = revitFamilyLessons.filter(l => canAccess(l)).length;
-  const completedCount = revitFamilyLessons.filter(l => completed.has(l.id)).length;
+  const topics          = [...new Set(revitFamilyLessons.map(l => l.topic))];
+  const unlockedCount   = revitFamilyLessons.filter(l => canAccess(l)).length;
+  const completedCount  = revitFamilyLessons.filter(l => completed.has(l.id)).length;
+  const freeCount       = revitFamilyLessons.filter(l => l.free).length;
+  const quizQuestions   = revitFamilyLessons.length * 10;
 
   return (
     <main style={{ background:'#0a0e1a', color:'#e8eaf0', minHeight:'100vh', paddingTop:'80px', fontFamily:"'DM Sans',sans-serif" }}>
@@ -127,8 +132,8 @@ export default function RevitFamilyCreationPage() {
         {/* Course stats strip */}
         <div style={{ display:'flex', flexWrap:'wrap', gap:'1.5rem', marginBottom:'2rem', padding:'1rem 1.5rem', background:'rgba(245,158,11,0.04)', border:'1px solid rgba(245,158,11,0.12)', borderRadius:'12px', fontSize:'13px' }}>
           {[
-            { label:'Total Lessons',   value:'24' },
-            { label:'Quiz Questions',  value:'240' },
+            { label:'Total Lessons',   value:String(revitFamilyLessons.length) },
+            { label:'Quiz Questions',  value:String(quizQuestions) },
             { label:'Skill Level',     value:'Beginner → Advanced' },
             { label:'Plan Required',   value:'Basic+' },
             { label:'Last Updated',    value:'June 2026' },
@@ -179,11 +184,24 @@ export default function RevitFamilyCreationPage() {
           />
         </div>
 
+        {/* Topic tabs */}
+        <div style={{ display:'flex', flexWrap:'wrap', gap:'.4rem', marginBottom:'1.5rem' }}>
+          {[['all','All Topics'], ...topics.map(t => [t, t])].map(([val,label]) => (
+            <button key={val} onClick={() => setActiveTopic(val)} style={{
+              background: activeTopic===val?'rgba(255,255,255,0.06)':'transparent',
+              border: `1px solid ${activeTopic===val?'rgba(255,255,255,0.15)':'rgba(255,255,255,0.08)'}`,
+              borderRadius:'6px', padding:'4px 12px', fontSize:'12px',
+              color: activeTopic===val?'#e8eaf0':'#8892a4',
+              cursor:'pointer', fontFamily:"'DM Sans',sans-serif",
+            }}>{label}</button>
+          ))}
+        </div>
+
         {/* Stats row */}
         <div style={{ display:'flex', gap:'1.5rem', marginBottom:'2rem', flexWrap:'wrap', alignItems:'center', fontSize:'13px', color:'#8892a4' }}>
           <span><strong style={{ color:'#e8eaf0' }}>{filtered.length}</strong> lessons</span>
           <span style={{ width:'4px', height:'4px', borderRadius:'50%', background:'rgba(255,255,255,0.08)', display:'inline-block' }}/>
-          <span><strong style={{ color:'#e8eaf0' }}>0</strong> free previews</span>
+          <span><strong style={{ color:'#e8eaf0' }}>{freeCount}</strong> free previews</span>
           <span style={{ width:'4px', height:'4px', borderRadius:'50%', background:'rgba(255,255,255,0.08)', display:'inline-block' }}/>
           <span>Updated <strong style={{ color:'#e8eaf0' }}>June 2026</strong></span>
         </div>
