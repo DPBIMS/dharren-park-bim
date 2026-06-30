@@ -23,6 +23,163 @@ const catColors = {
   advanced:     { bg: 'rgba(239,68,68,0.1)',  c: '#f87171' },
 };
 
+// ─── Inline markdown: **bold**, `code`, *italic* ───────────────────────────
+function inline(str) {
+  if (!str) return null;
+  return String(str).split(/(\*\*[^*]+\*\*|`[^`]+`|\*[^*]+\*)/g).filter(p => p !== '').map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i} style={{ color: '#f1f5f9', fontWeight: 700 }}>{part.slice(2, -2)}</strong>;
+    }
+    if (part.startsWith('`') && part.endsWith('`')) {
+      return <code key={i} style={{ background: 'rgba(255,255,255,0.08)', padding: '2px 6px', borderRadius: '4px', fontFamily: "'Courier New',monospace", fontSize: '0.9em', color: '#fbbf24' }}>{part.slice(1, -1)}</code>;
+    }
+    if (part.startsWith('*') && part.endsWith('*')) {
+      return <em key={i} style={{ color: '#9ca3af' }}>{part.slice(1, -1)}</em>;
+    }
+    return part;
+  });
+}
+
+// ─── Callout label themes — keyword-matched, colored box like a "formula" callout ──
+const CALLOUT_THEMES = [
+  { test: /mistake|warning|never\b|caution|disaster/i,            color: '#f87171', bg: 'rgba(239,68,68,0.07)',  border: 'rgba(239,68,68,0.22)',  icon: '⚠' },
+  { test: /important|critical|rule\b/i,                           color: '#fbbf24', bg: 'rgba(245,158,11,0.07)', border: 'rgba(245,158,11,0.22)', icon: '❗' },
+  { test: /best practice|standard|convention/i,                   color: '#34d399', bg: 'rgba(34,197,94,0.07)',  border: 'rgba(34,197,94,0.22)',  icon: '✓' },
+  { test: /why (this|it) matters|honest assessment|distinction/i, color: '#a78bfa', bg: 'rgba(139,92,246,0.07)', border: 'rgba(139,92,246,0.22)', icon: '★' },
+  { test: /tip\b/i,                                               color: '#60a5fa', bg: 'rgba(37,99,235,0.07)',  border: 'rgba(37,99,235,0.22)',  icon: '💡' },
+];
+const calloutTheme = (label) => CALLOUT_THEMES.find(t => t.test.test(label)) || null;
+
+// A line that starts its own block (table row, bullet, numbered item, or standalone bold label)
+function isSpecialLine(line) {
+  const t = line.trim();
+  return t === '' || t.startsWith('|') || /^-\s/.test(t) || /^\d+\.\s/.test(t) || /^\*\*[^*]+\*\*:?$/.test(t);
+}
+
+// ─── Rich content renderer — turns the free-text lesson copy into tables, numbered
+// step boxes, checklists, and colored callouts so lessons 4-24 match the lesson 1-3 look ──
+function RichContent({ text }) {
+  if (!text) return null;
+  const lines = text.split('\n');
+  const blocks = [];
+  let i = 0, key = 0;
+
+  while (i < lines.length) {
+    const raw = lines[i];
+    const t = raw.trim();
+
+    if (t === '') { i++; continue; }
+
+    // Markdown table
+    if (t.startsWith('|')) {
+      const rows = [];
+      while (i < lines.length && lines[i].trim().startsWith('|')) { rows.push(lines[i].trim()); i++; }
+      const dataRows = rows.filter(r => r.replace(/[|:\-\s]/g, '') !== '');
+      blocks.push(
+        <div key={key++} style={{ border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', overflow: 'hidden', margin: '1.1rem 0' }}>
+          {dataRows.map((r, ri) => {
+            const cells = r.split('|').slice(1, -1).map(c => c.trim());
+            return (
+              <div key={ri} style={{
+                display: 'grid', gridTemplateColumns: `repeat(${cells.length}, 1fr)`,
+                background: ri === 0 ? 'rgba(37,99,235,0.1)' : ri % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent',
+                borderBottom: ri < dataRows.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+              }}>
+                {cells.map((c, ci) => (
+                  <div key={ci} style={{
+                    padding: '8px 12px',
+                    fontSize: ri === 0 ? '11px' : '13px',
+                    fontWeight: ri === 0 ? 700 : 400,
+                    color: ri === 0 ? '#60a5fa' : '#c8d0de',
+                    textTransform: ri === 0 ? 'uppercase' : 'none',
+                    letterSpacing: ri === 0 ? '.4px' : 'normal',
+                  }}>
+                    {inline(c)}
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+        </div>
+      );
+      continue;
+    }
+
+    // Numbered list → step badges
+    if (/^\d+\.\s/.test(t)) {
+      const items = [];
+      while (i < lines.length && /^\d+\.\s/.test(lines[i].trim())) {
+        items.push(lines[i].trim().replace(/^\d+\.\s/, ''));
+        i++;
+      }
+      blocks.push(
+        <div key={key++} style={{ display: 'flex', flexDirection: 'column', gap: '8px', margin: '1.1rem 0' }}>
+          {items.map((it, idx) => (
+            <div key={idx} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '8px', padding: '9px 12px' }}>
+              <span style={{ flexShrink: 0, width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(37,99,235,0.18)', color: '#60a5fa', fontSize: '11px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '1px' }}>{idx + 1}</span>
+              <span style={{ fontSize: '14px', color: '#c8d0de', lineHeight: '1.6' }}>{inline(it)}</span>
+            </div>
+          ))}
+        </div>
+      );
+      continue;
+    }
+
+    // Bullet list → checklist
+    if (/^-\s/.test(t)) {
+      const items = [];
+      while (i < lines.length && /^-\s/.test(lines[i].trim())) {
+        items.push(lines[i].trim().slice(2));
+        i++;
+      }
+      blocks.push(
+        <ul key={key++} style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '7px', margin: '1.1rem 0', padding: 0 }}>
+          {items.map((it, idx) => (
+            <li key={idx} style={{ fontSize: '14px', color: '#a8b0c4', display: 'flex', alignItems: 'flex-start', gap: '8px', lineHeight: '1.6' }}>
+              <span style={{ color: '#3b82f6', flexShrink: 0, marginTop: '2px' }}>✓</span>
+              <span>{inline(it)}</span>
+            </li>
+          ))}
+        </ul>
+      );
+      continue;
+    }
+
+    // Standalone bold label — either a colored callout box, or a plain sub-heading
+    const labelMatch = t.match(/^\*\*([^*]+)\*\*:?$/);
+    if (labelMatch) {
+      const label = labelMatch[1].replace(/:$/, '');
+      i++;
+      const bodyLines = [];
+      while (i < lines.length && !isSpecialLine(lines[i])) { bodyLines.push(lines[i]); i++; }
+      const body = bodyLines.join(' ').trim();
+      const theme = calloutTheme(label);
+      if (theme) {
+        blocks.push(
+          <div key={key++} style={{ background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: '10px', padding: '1rem 1.25rem', margin: '1.25rem 0' }}>
+            <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '.5px', color: theme.color, textTransform: 'uppercase', marginBottom: body ? '.4rem' : 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span>{theme.icon}</span><span>{label}</span>
+            </div>
+            {body && <div style={{ fontSize: '14px', color: '#c8d0de', lineHeight: '1.7' }}>{inline(body)}</div>}
+          </div>
+        );
+      } else {
+        blocks.push(<h3 key={key++} style={{ fontSize: '13px', fontWeight: 700, color: '#3b82f6', letterSpacing: '.3px', textTransform: 'uppercase', margin: '1.25rem 0 .5rem' }}>{label}</h3>);
+        if (body) blocks.push(<p key={key++} style={{ fontSize: '14px', color: '#c8d0de', lineHeight: '1.8', margin: '0 0 1rem' }}>{inline(body)}</p>);
+      }
+      continue;
+    }
+
+    // Default paragraph
+    const paraLines = [raw];
+    i++;
+    while (i < lines.length && !isSpecialLine(lines[i])) { paraLines.push(lines[i]); i++; }
+    blocks.push(<p key={key++} style={{ fontSize: '14px', color: '#c8d0de', lineHeight: '1.8', margin: '0 0 1rem' }}>{inline(paraLines.join(' '))}</p>);
+  }
+
+  return <div>{blocks}</div>;
+}
+
 export default function NavisworksLessonClient({ lesson, allLessons }) {
   const router = useRouter();
   const [completed,     setCompleted]     = useState(false);
@@ -94,13 +251,6 @@ export default function NavisworksLessonClient({ lesson, allLessons }) {
     return checker(l);
   }
 
-  function renderContent(text) {
-    if (!text) return null;
-    return text.split('**').map((part, i) =>
-      i % 2 === 1 ? <strong key={i}>{part}</strong> : part
-    );
-  }
-
   const tc = topicColors[lesson.topic] || topicColors.general;
   const cc = catColors[lesson.cat] || catColors.beginner;
   const nextLesson = nextNav ? allLessons.find(l => l.id === nextNav.id) : null;
@@ -139,7 +289,7 @@ export default function NavisworksLessonClient({ lesson, allLessons }) {
 
           <div style={{ fontSize: '13px', color: '#8892a4', marginBottom: '.4rem' }}>Lesson {lesson.num}</div>
           <h1 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '2rem', letterSpacing: '-.5px', marginBottom: '1rem', lineHeight: 1.2 }}>{lesson.title}</h1>
-          <p style={{ fontSize: '15px', color: '#8892a4', lineHeight: '1.75', marginBottom: '2.5rem', maxWidth: '680px' }}>{lesson.intro}</p>
+          <p style={{ fontSize: '15px', color: '#8892a4', lineHeight: '1.75', marginBottom: '2.5rem', maxWidth: '680px' }}>{inline(lesson.intro)}</p>
 
           {/* Sections */}
           <div style={{ maxWidth: '720px' }}>
@@ -147,11 +297,7 @@ export default function NavisworksLessonClient({ lesson, allLessons }) {
               <div key={section.id} id={section.id} style={{ marginBottom: '2.5rem' }}>
                 <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '1.35rem', marginBottom: '1rem', color: '#e8eaf0' }}>{section.heading}</h2>
 
-                {section.content && (
-                  <p style={{ fontSize: '14px', color: '#c8d0de', lineHeight: '1.8', marginBottom: '1rem' }}>
-                    {renderContent(section.content)}
-                  </p>
-                )}
+                {section.content && <RichContent text={section.content} />}
 
                 {section.subsections?.map((sub, i) => (
                   <div key={i} style={{ marginBottom: '1rem' }}>
@@ -160,7 +306,7 @@ export default function NavisworksLessonClient({ lesson, allLessons }) {
                       {sub.items.map((item, j) => (
                         <li key={j} style={{ fontSize: '14px', color: '#8892a4', display: 'flex', alignItems: 'flex-start', gap: '8px', lineHeight: '1.6' }}>
                           <span style={{ color: '#3b82f6', flexShrink: 0, marginTop: '2px' }}>✓</span>
-                          <span>{renderContent(item)}</span>
+                          <span>{inline(item)}</span>
                         </li>
                       ))}
                     </ul>
@@ -172,7 +318,7 @@ export default function NavisworksLessonClient({ lesson, allLessons }) {
                     {section.items.map((item, i) => (
                       <li key={i} style={{ fontSize: '14px', color: '#8892a4', display: 'flex', alignItems: 'flex-start', gap: '8px', lineHeight: '1.6' }}>
                         <span style={{ color: '#3b82f6', flexShrink: 0, marginTop: '2px' }}>✓</span>
-                        <span>{renderContent(item)}</span>
+                        <span>{inline(item)}</span>
                       </li>
                     ))}
                   </ul>

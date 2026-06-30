@@ -75,7 +75,7 @@
    ============================================================ */
 .contentBody h2      { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.25rem; color: #fff; margin: 2rem 0 .75rem; letter-spacing: -.3px; }
 .contentBody h3      { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; color: #3b82f6; margin: 1.5rem 0 .5rem; }
-.contentBody p       { color: #c8cdd8; font-size: 15px; line-height: 1.85; margin-bottom: 1rem; }
+.contentBody p       { color: #c8cdd8; font-size: 15px; line-height: 1.85; margin-bottom: 1rem; white-space: pre-line; }
 .contentBody ul,
 .contentBody ol      { margin: 0 0 1rem 1.25rem; color: #c8cdd8; }
 .contentBody li      { font-size: 15px; line-height: 1.85; margin-bottom: .3rem; }
