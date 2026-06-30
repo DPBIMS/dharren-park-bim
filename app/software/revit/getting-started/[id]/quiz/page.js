@@ -10,7 +10,7 @@ export function generateStaticParams() {
 export default async function RevitQuizPage({ params }) {
   const { id } = await params;
   const lesson = revitLessons.find(l => l.id === id);
-  const quiz   = revitQuizzes[id];
+  const quiz   = revitQuizzes.find(q => q.lessonId === id);
   if (!lesson || !quiz) notFound();
   return <RevitQuizClient quiz={quiz} lesson={lesson} />;
 }

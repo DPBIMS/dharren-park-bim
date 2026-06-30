@@ -53,24 +53,55 @@ const NAV_ITEMS = [
     columns: [
       {
         heading: 'REVIT',
+        headingIcon: 'revit',
         items: [
           {
             icon: 'play',
-            label: 'Getting started',
+            label: 'Getting Started',
             sub: 'Interface & first model',
             href: '/software/revit/getting-started',
+            status: 'live',
           },
           {
-            icon: 'arrows',
-            label: 'Workflow',
-            sub: 'Collaborate & coordinate',
-            href: '/software/revit/workflow',
+            icon: 'settings',
+            label: 'Project Setup',
+            sub: 'Templates & office standards',
+            href: '/software/revit/project-setup',
+            status: 'live',
           },
+          {
+            icon: 'grid',
+            label: 'Revit Matrix',
+            sub: 'Company-level BIM management',
+            href: '/software/revit/matrix',
+            badge: 'Soon',
+          },
+        ],
+      },
+      {
+        heading: 'REVIT FAMILIES',
+        headingIcon: 'diamond',
+        items: [
           {
             icon: 'diamond',
-            label: 'Family creation',
+            label: 'Family Creation',
             sub: 'Custom parametric families',
-            href: '/software/revit/family-creation',
+            href: '/software/revit/families',
+            status: 'live',
+          },
+          {
+            icon: 'layers',
+            label: 'Family Setup',
+            sub: 'Family templates & standards',
+            href: '/software/revit/family-setup',
+            status: 'live',
+          },
+          {
+            icon: 'grid',
+            label: 'Family Matrix',
+            sub: 'Company-level family management',
+            href: '/software/revit/family-matrix',
+            badge: 'Soon',
           },
         ],
       },
@@ -130,7 +161,7 @@ const NAV_ITEMS = [
           {
             icon: 'plus',
             label: 'ISO 19650',
-            sub: 'Parts 1–6 series',
+            sub: 'Parts 1-6 series',
             href: '/standards/iso-19650',
             badge: 'Updated',
             badgeColor: 'green',
@@ -278,7 +309,10 @@ const TIER_CONFIG = {
 // ─── ICON HELPER ─────────────────────────────────────────────────────────────
 
 function NavIcon({ type }) {
-  const base = { width: 14, height: 14, stroke: 'currentColor', fill: 'none', strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round' };
+  const base = {
+    width: 14, height: 14, stroke: 'currentColor', fill: 'none',
+    strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round',
+  };
   const icons = {
     circle:  <svg {...base}><circle cx="7" cy="7" r="5" /></svg>,
     grid:    <svg {...base}><rect x="2" y="2" width="4" height="4" rx="0.5"/><rect x="8" y="2" width="4" height="4" rx="0.5"/><rect x="2" y="8" width="4" height="4" rx="0.5"/><rect x="8" y="8" width="4" height="4" rx="0.5"/></svg>,
@@ -293,8 +327,10 @@ function NavIcon({ type }) {
     plus:    <svg {...base}><line x1="7" y1="3" x2="7" y2="11"/><line x1="3" y1="7" x2="11" y2="7"/></svg>,
     refresh: <svg {...base}><path d="M4 7a3 3 0 105.7-1.3"/><polyline points="9,3 9,6 12,6"/></svg>,
     code:    <svg {...base}><polyline points="4,5 1,7 4,9"/><polyline points="10,5 13,7 10,9"/><line x1="8" y1="3" x2="6" y2="11"/></svg>,
-    globe:   <svg {...base}><circle cx="7" cy="7" r="5"/><path d="M2 7h10M7 2a8 8 0 000 10"/></svg>,
-    arrow:   <svg {...base}><line x1="3" y1="7" x2="11" y2="7"/><polyline points="8,4 11,7 8,10"/></svg>,
+    globe:    <svg {...base}><circle cx="7" cy="7" r="5"/><path d="M2 7h10M7 2a8 8 0 000 10"/></svg>,
+    arrow:    <svg {...base}><line x1="3" y1="7" x2="11" y2="7"/><polyline points="8,4 11,7 8,10"/></svg>,
+    layers:   <svg {...base}><polygon points="7,1 13,4.5 7,8 1,4.5"/><polyline points="1,7.5 7,11 13,7.5"/><polyline points="1,10.5 7,14 13,10.5"/></svg>,
+    settings: <svg {...base}><circle cx="7" cy="7" r="2"/><path d="M7 1v2M7 11v2M1 7h2M11 7h2M2.9 2.9l1.4 1.4M9.7 9.7l1.4 1.4M2.9 11.1l1.4-1.4M9.7 4.3l1.4-1.4"/></svg>,
   };
   return icons[type] || icons.circle;
 }
@@ -306,6 +342,7 @@ function Badge({ text, color = 'amber' }) {
     amber: { bg: 'rgba(245,158,11,0.15)', text: '#fbbf24', border: 'rgba(245,158,11,0.3)' },
     green: { bg: 'rgba(52,211,153,0.12)', text: '#34d399',  border: 'rgba(52,211,153,0.25)' },
     blue:  { bg: 'rgba(96,165,250,0.12)', text: '#60a5fa',  border: 'rgba(96,165,250,0.25)' },
+    gray:  { bg: 'rgba(107,114,128,0.12)', text: '#9ca3af', border: 'rgba(107,114,128,0.2)' },
   };
   const c = colors[color] || colors.amber;
   return (
@@ -336,7 +373,7 @@ function Dropdown({ item, onClose }) {
       border: '1px solid rgba(255,255,255,0.08)',
       borderRadius: 12,
       boxShadow: '0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(37,99,235,0.1)',
-      minWidth: colCount === 1 ? 260 : colCount === 2 ? 460 : 620,
+      minWidth: colCount <= 1 ? 260 : colCount === 2 ? 460 : colCount === 3 ? 660 : 860,
       zIndex: 100,
       overflow: 'hidden',
     }}>
@@ -344,9 +381,7 @@ function Dropdown({ item, onClose }) {
       <div style={{
         padding: '14px 20px 12px',
         borderBottom: '1px solid rgba(255,255,255,0.06)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 10,
+        display: 'flex', alignItems: 'center', gap: 10,
       }}>
         <span style={{
           fontSize: 10, fontWeight: 700, letterSpacing: '0.1em',
@@ -371,70 +406,133 @@ function Dropdown({ item, onClose }) {
         gridTemplateColumns: `repeat(${colCount}, 1fr)`,
         gap: 0,
       }}>
-        {item.columns.map((col, ci) => (
-          <div key={ci} style={{
-            padding: '16px 20px 18px',
-            borderRight: ci < colCount - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
-          }}>
-            <p style={{
-              fontSize: 10, fontWeight: 700, letterSpacing: '0.12em',
-              color: '#3d4a6b', marginBottom: 10,
-              fontFamily: 'DM Sans, sans-serif',
+        {item.columns.map((col, ci) => {
+          const isRevit  = col.heading === 'REVIT';
+          const isFamily = col.heading === 'REVIT FAMILIES';
+          const isHighlight = isRevit || isFamily;
+          const accentColor = isRevit ? '#2563eb' : '#f59e0b';
+          const accentText  = isRevit ? '#60a5fa'  : '#f59e0b';
+
+          return (
+            <div key={ci} style={{
+              padding: '16px 20px 18px',
+              borderRight: ci < colCount - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+              background: isHighlight ? `${accentColor}08` : 'transparent',
             }}>
-              {col.heading}
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {col.items.map((link, li) => (
-                <Link
-                  key={li}
-                  href={link.href}
-                  onClick={onClose}
-                  style={{ textDecoration: 'none' }}
-                >
+              {/* Column heading */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+                {isHighlight && (
                   <div style={{
-                    display: 'flex', alignItems: 'center', gap: 10,
-                    padding: '8px 10px', borderRadius: 8,
-                    transition: 'background 0.15s',
-                    cursor: 'pointer',
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                  >
-                    {/* Icon box */}
-                    <div style={{
-                      width: 30, height: 30, borderRadius: 7, flexShrink: 0,
-                      background: 'rgba(255,255,255,0.04)',
-                      border: '1px solid rgba(255,255,255,0.07)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#5a6fa8',
-                    }}>
-                      <NavIcon type={link.icon} />
-                    </div>
-                    {/* Text */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{
-                        fontSize: 13.5, fontWeight: 600, color: '#e2e8f0',
-                        fontFamily: 'DM Sans, sans-serif', lineHeight: 1.2,
-                      }}>
-                        {link.label}
-                      </div>
-                      <div style={{
-                        fontSize: 11.5, color: '#4a5a80',
-                        fontFamily: 'DM Sans, sans-serif', lineHeight: 1.3, marginTop: 1,
-                      }}>
-                        {link.sub}
-                      </div>
-                    </div>
-                    {/* Badge */}
-                    {link.badge && (
-                      <Badge text={link.badge} color={link.badgeColor || 'amber'} />
-                    )}
+                    width: 16, height: 16, borderRadius: 4, flexShrink: 0,
+                    background: accentColor,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
+                      {isRevit ? (
+                        <>
+                          <rect x="1" y="1" width="3" height="3" rx="0.5" fill="white" opacity="0.9"/>
+                          <rect x="5" y="1" width="3" height="3" rx="0.5" fill="white" opacity="0.6"/>
+                          <rect x="1" y="5" width="3" height="3" rx="0.5" fill="white" opacity="0.6"/>
+                          <rect x="5" y="5" width="3" height="3" rx="0.5" fill="#f59e0b"/>
+                        </>
+                      ) : (
+                        <polygon points="4.5,1 8,4.5 4.5,8 1,4.5" fill="white" opacity="0.9"/>
+                      )}
+                    </svg>
                   </div>
-                </Link>
-              ))}
+                )}
+                <p style={{
+                  fontSize: isHighlight ? 11 : 10,
+                  fontWeight: isHighlight ? 800 : 700,
+                  letterSpacing: isHighlight ? '0.06em' : '0.12em',
+                  color: isHighlight ? accentText : '#3d4a6b',
+                  margin: 0,
+                  fontFamily: 'DM Sans, sans-serif',
+                  textTransform: 'uppercase',
+                }}>
+                  {col.heading}
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {col.items.map((link, li) => {
+                  const isLive = link.status === 'live';
+                  const isSoon = link.badge === 'Soon';
+                  return (
+                    <Link
+                      key={li}
+                      href={isSoon ? '#' : link.href}
+                      onClick={isSoon ? (e) => e.preventDefault() : onClose}
+                      style={{ textDecoration: 'none', opacity: isSoon ? 0.5 : 1 }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 10,
+                          padding: '8px 10px', borderRadius: 8,
+                          transition: 'background 0.15s',
+                          cursor: isSoon ? 'default' : 'pointer',
+                        }}
+                        onMouseEnter={e => { if (!isSoon) e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      >
+                        {/* Icon box */}
+                        <div style={{
+                          width: 30, height: 30, borderRadius: 7, flexShrink: 0,
+                          background: isHighlight && isLive
+                            ? `${accentColor}22`
+                            : 'rgba(255,255,255,0.04)',
+                          border: `1px solid ${isHighlight && isLive
+                            ? `${accentColor}44`
+                            : 'rgba(255,255,255,0.07)'}`,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          color: isHighlight && isLive ? accentText : '#5a6fa8',
+                        }}>
+                          <NavIcon type={link.icon} />
+                        </div>
+
+                        {/* Text */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{
+                            fontSize: 13.5,
+                            fontWeight: isLive ? 600 : 500,
+                            color: isLive ? '#e2e8f0' : '#6b7280',
+                            fontFamily: 'DM Sans, sans-serif',
+                            lineHeight: 1.2,
+                            display: 'flex', alignItems: 'center', gap: 6,
+                          }}>
+                            {link.label}
+                            {/* Live indicator dot for Revit courses */}
+                            {isHighlight && isLive && (
+                              <span style={{
+                                width: 5, height: 5, borderRadius: '50%',
+                                background: accentColor, flexShrink: 0,
+                                boxShadow: `0 0 4px ${accentColor}`,
+                              }} />
+                            )}
+                          </div>
+                          <div style={{
+                            fontSize: 11.5, color: '#4a5a80',
+                            fontFamily: 'DM Sans, sans-serif', lineHeight: 1.3, marginTop: 1,
+                          }}>
+                            {link.sub}
+                          </div>
+                        </div>
+
+                        {/* Badge */}
+                        {link.badge && (
+                          <Badge
+                            text={link.badge}
+                            color={isSoon ? 'gray' : (link.badgeColor || 'amber')}
+                          />
+                        )}
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -443,16 +541,16 @@ function Dropdown({ item, onClose }) {
 // ─── NAVBAR ──────────────────────────────────────────────────────────────────
 
 export default function Navbar() {
-  const [user, setUser]           = useState(null);
-  const [isAdmin, setIsAdmin]     = useState(false);
-  const [activeMenu, setActiveMenu] = useState(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [user,           setUser]           = useState(null);
+  const [isAdmin,        setIsAdmin]        = useState(false);
+  const [activeMenu,     setActiveMenu]     = useState(null);
+  const [mobileOpen,     setMobileOpen]     = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState(null);
-  const [scrolled, setScrolled]   = useState(false);
-  const navRef = useRef(null);
-  const closeTimer = useRef(null);
-  const router = useRouter();
-  const pathname = usePathname();
+  const [scrolled,       setScrolled]       = useState(false);
+  const navRef      = useRef(null);
+  const closeTimer  = useRef(null);
+  const router      = useRouter();
+  const pathname    = usePathname();
 
   // ── Auth ──────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -601,11 +699,9 @@ export default function Navbar() {
 
         <div style={{
           maxWidth: 1280, margin: '0 auto',
-          padding: '0 24px',
-          height: 60,
+          padding: '0 24px', height: 60,
           display: 'flex', alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 16,
+          justifyContent: 'space-between', gap: 16,
         }}>
 
           {/* ── Logo ── */}
@@ -630,140 +726,163 @@ export default function Navbar() {
           </Link>
 
           {/* ── Desktop Nav ── */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1, justifyContent: 'center' }}
-               className="dpbim-desktop-nav">
+          <div
+            style={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1, justifyContent: 'center' }}
+            className="dpbim-desktop-nav"
+          >
             {NAV_ITEMS.map(item => {
-              // Derive base path from first item in first column
-              const basePath = '/' + item.label.toLowerCase().replace(/\s+/g, '-').replace('ai-in-bim', 'ai-in-bim');
+              const basePath = '/' + item.label.toLowerCase().replace(/\s+/g, '-');
               const isActive = pathname.startsWith(basePath);
               return (
-              <div
-                key={item.label}
-                style={{ position: 'relative' }}
-                onMouseEnter={() => handleNavEnter(item.label)}
-                onMouseLeave={handleNavLeave}
-              >
-                <button className={`dpbim-nav-link${activeMenu === item.label || isActive ? ' active' : ''}`}
-                  style={isActive ? { color: '#fff', background: 'rgba(37,99,235,0.1)' } : {}}>
-                  {item.label}
-                  <svg className="chev" width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                  </svg>
-                  {isActive && (
-                    <span style={{
-                      position: 'absolute', bottom: -1, left: '50%',
-                      transform: 'translateX(-50%)',
-                      width: 20, height: 2, borderRadius: 2,
-                      background: '#2563eb',
-                    }} />
-                  )}
-                </button>
-                {activeMenu === item.label && (
-                  <div
-                    onMouseEnter={handleDropdownEnter}
-                    onMouseLeave={handleNavLeave}
+                <div
+                  key={item.label}
+                  style={{ position: 'relative' }}
+                  onMouseEnter={() => handleNavEnter(item.label)}
+                  onMouseLeave={handleNavLeave}
+                >
+                  <button
+                    className={`dpbim-nav-link${activeMenu === item.label || isActive ? ' active' : ''}`}
+                    style={isActive ? { color: '#fff', background: 'rgba(37,99,235,0.1)' } : {}}
                   >
-                    <Dropdown item={item} onClose={() => setActiveMenu(null)} />
-                  </div>
-                )}
-              </div>
-            );
+                    {item.label}
+                    <svg className="chev" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                    {isActive && (
+                      <span style={{
+                        position: 'absolute', bottom: -1, left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: 20, height: 2, borderRadius: 2, background: '#2563eb',
+                      }} />
+                    )}
+                  </button>
+                  {activeMenu === item.label && (
+                    <div
+                      onMouseEnter={handleDropdownEnter}
+                      onMouseLeave={handleNavLeave}
+                    >
+                      <Dropdown item={item} onClose={() => setActiveMenu(null)} />
+                    </div>
+                  )}
+                </div>
+              );
             })}
           </div>
 
           {/* ── Right Actions ── */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-            {isAdmin && (
-              <Link href="/admin" style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '7px 14px',
-                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                borderRadius: 7,
-                fontSize: 13, fontWeight: 600,
-                color: '#0a0e1a', textDecoration: 'none',
-                fontFamily: 'DM Sans, sans-serif',
-              }}>
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <circle cx="6" cy="6" r="4.5" stroke="rgba(0,0,0,0.5)" strokeWidth="1.5"/>
-                  <circle cx="6" cy="6" r="2" fill="rgba(0,0,0,0.4)"/>
-                </svg>
-                Admin
-              </Link>
-            )}
 
-            {/* Pricing — always visible, highlights when active */}
-            <Link href="/pricing" style={{
-              padding: '7px 13px', borderRadius: 7,
-              fontSize: 13, fontWeight: pathname === '/pricing' ? 600 : 500,
-              color: pathname === '/pricing' ? '#fff' : '#8b95b8',
-              textDecoration: 'none', fontFamily: 'DM Sans, sans-serif',
-              background: pathname === '/pricing' ? 'rgba(37,99,235,0.15)' : 'transparent',
-              border: pathname === '/pricing' ? '1px solid rgba(37,99,235,0.35)' : '1px solid transparent',
-              transition: 'color 0.15s, background 0.15s, border-color 0.15s',
-              position: 'relative',
-            }}
-            onMouseEnter={e => {
-              if (pathname !== '/pricing') {
-                e.currentTarget.style.color = '#fff';
-                e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-              }
-            }}
-            onMouseLeave={e => {
-              if (pathname !== '/pricing') {
-                e.currentTarget.style.color = '#8b95b8';
-                e.currentTarget.style.background = 'transparent';
-              }
-            }}
+            {/* Pricing */}
+            <Link
+              href="/pricing"
+              style={{
+                padding: '7px 13px', borderRadius: 7,
+                fontSize: 13, fontWeight: pathname === '/pricing' ? 600 : 500,
+                color: pathname === '/pricing' ? '#fff' : '#8b95b8',
+                textDecoration: 'none', fontFamily: 'DM Sans, sans-serif',
+                background: pathname === '/pricing' ? 'rgba(37,99,235,0.15)' : 'transparent',
+                border: pathname === '/pricing' ? '1px solid rgba(37,99,235,0.35)' : '1px solid transparent',
+                transition: 'color 0.15s, background 0.15s, border-color 0.15s',
+                position: 'relative',
+              }}
+              onMouseEnter={e => {
+                if (pathname !== '/pricing') {
+                  e.currentTarget.style.color = '#fff';
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                }
+              }}
+              onMouseLeave={e => {
+                if (pathname !== '/pricing') {
+                  e.currentTarget.style.color = '#8b95b8';
+                  e.currentTarget.style.background = 'transparent';
+                }
+              }}
             >
               Pricing
               {pathname === '/pricing' && (
                 <span style={{
                   position: 'absolute', bottom: -1, left: '50%',
                   transform: 'translateX(-50%)',
-                  width: 20, height: 2, borderRadius: 2,
-                  background: '#2563eb',
+                  width: 20, height: 2, borderRadius: 2, background: '#2563eb',
                 }} />
               )}
             </Link>
 
             {user ? (
-              /* ── Logged IN: Dashboard ── */
-              <Link href="/dashboard" style={{
-                padding: '7px 13px',
-                background: 'rgba(37,99,235,0.12)',
-                border: '1px solid rgba(37,99,235,0.3)',
-                borderRadius: 7,
-                fontSize: 13, fontWeight: 500, color: '#60a5fa',
-                textDecoration: 'none', fontFamily: 'DM Sans, sans-serif',
-              }}>
-                Dashboard
-              </Link>
-            ) : (
-              /* ── Logged OUT: Log in + Get Started ── */
               <>
-                <Link href="/login" style={{
-                  padding: '7px 13px', borderRadius: 7,
-                  fontSize: 13, fontWeight: 500, color: '#8b95b8',
-                  textDecoration: 'none', fontFamily: 'DM Sans, sans-serif',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  transition: 'color 0.15s, border-color 0.15s',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'; }}
-                onMouseLeave={e => { e.currentTarget.style.color = '#8b95b8'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}
+                {/* Dashboard */}
+                <Link
+                  href="/dashboard"
+                  style={{
+                    padding: '7px 13px',
+                    background: pathname === '/dashboard' ? 'rgba(37,99,235,0.2)' : 'rgba(37,99,235,0.12)',
+                    border: '1px solid rgba(37,99,235,0.3)',
+                    borderRadius: 7,
+                    fontSize: 13, fontWeight: 500, color: '#60a5fa',
+                    textDecoration: 'none', fontFamily: 'DM Sans, sans-serif',
+                    transition: 'background 0.15s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(37,99,235,0.22)'}
+                  onMouseLeave={e => e.currentTarget.style.background = pathname === '/dashboard' ? 'rgba(37,99,235,0.2)' : 'rgba(37,99,235,0.12)'}
+                >
+                  Dashboard
+                </Link>
+
+                {/* ── Admin Panel button — only for admin ── */}
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 6,
+                      padding: '7px 14px',
+                      background: pathname.startsWith('/admin') ? 'rgba(245,158,11,0.2)' : 'rgba(245,158,11,0.1)',
+                      border: '1px solid rgba(245,158,11,0.35)',
+                      borderRadius: 7,
+                      fontSize: 13, fontWeight: 600,
+                      color: '#f59e0b', textDecoration: 'none',
+                      fontFamily: 'DM Sans, sans-serif',
+                      transition: 'background 0.15s',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(245,158,11,0.22)'}
+                    onMouseLeave={e => e.currentTarget.style.background = pathname.startsWith('/admin') ? 'rgba(245,158,11,0.2)' : 'rgba(245,158,11,0.1)'}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <circle cx="6" cy="6" r="5" stroke="#f59e0b" strokeWidth="1.5"/>
+                      <circle cx="6" cy="6" r="2" fill="#f59e0b"/>
+                    </svg>
+                    Admin Panel
+                  </Link>
+                )}
+              </>
+            ) : (
+              <>
+                {/* Log in */}
+                <Link
+                  href="/login"
+                  style={{
+                    padding: '7px 13px', borderRadius: 7,
+                    fontSize: 13, fontWeight: 500, color: '#8b95b8',
+                    textDecoration: 'none', fontFamily: 'DM Sans, sans-serif',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    transition: 'color 0.15s, border-color 0.15s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = '#8b95b8'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }}
                 >
                   Log in
                 </Link>
 
-                <Link href="/register" style={{
-                  padding: '7px 14px',
-                  background: '#2563eb',
-                  borderRadius: 7,
-                  fontSize: 13, fontWeight: 600, color: '#fff',
-                  textDecoration: 'none', fontFamily: 'DM Sans, sans-serif',
-                  transition: 'background 0.15s',
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = '#1d4ed8'}
-                onMouseLeave={e => e.currentTarget.style.background = '#2563eb'}
+                {/* Get Started */}
+                <Link
+                  href="/register"
+                  style={{
+                    padding: '7px 14px', background: '#2563eb', borderRadius: 7,
+                    fontSize: 13, fontWeight: 600, color: '#fff',
+                    textDecoration: 'none', fontFamily: 'DM Sans, sans-serif',
+                    transition: 'background 0.15s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#1d4ed8'}
+                  onMouseLeave={e => e.currentTarget.style.background = '#2563eb'}
                 >
                   Get Started
                 </Link>
@@ -802,16 +921,25 @@ export default function Navbar() {
                   onClick={() => setMobileExpanded(e => e === item.label ? null : item.label)}
                 >
                   <span>{item.label}</span>
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-                    style={{ transform: mobileExpanded === item.label ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', color: '#4a5a80' }}>
+                  <svg
+                    width="14" height="14" viewBox="0 0 14 14" fill="none"
+                    style={{
+                      transform: mobileExpanded === item.label ? 'rotate(180deg)' : 'none',
+                      transition: 'transform 0.2s', color: '#4a5a80',
+                    }}
+                  >
                     <path d="M3 5L7 9L11 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                   </svg>
                 </button>
                 {mobileExpanded === item.label && (
                   <div className="dpbim-mobile-items">
                     {item.columns.flatMap(col => col.items).map((link, i) => (
-                      <Link key={i} href={link.href} className="dpbim-mobile-item"
-                        onClick={() => { setMobileOpen(false); setMobileExpanded(null); }}>
+                      <Link
+                        key={i}
+                        href={link.href}
+                        className="dpbim-mobile-item"
+                        onClick={() => { setMobileOpen(false); setMobileExpanded(null); }}
+                      >
                         <div style={{
                           width: 28, height: 28, borderRadius: 6, flexShrink: 0,
                           background: 'rgba(255,255,255,0.04)',
@@ -833,21 +961,76 @@ export default function Navbar() {
               </div>
             ))}
 
-            {/* Mobile auth */}
+            {/* ── Mobile auth buttons ── */}
             <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <Link href="/pricing" style={{ textAlign: 'center', padding: '11px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', fontSize: 14, fontWeight: 500, color: '#8b95b8', textDecoration: 'none', fontFamily: 'DM Sans, sans-serif' }}>
+              <Link
+                href="/pricing"
+                style={{
+                  textAlign: 'center', padding: '11px', borderRadius: 8,
+                  background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)',
+                  fontSize: 14, fontWeight: 500, color: '#8b95b8',
+                  textDecoration: 'none', fontFamily: 'DM Sans, sans-serif',
+                }}
+              >
                 Pricing
               </Link>
+
               {user ? (
-                <Link href="/dashboard" style={{ textAlign: 'center', padding: '11px', borderRadius: 8, background: 'rgba(37,99,235,0.12)', border: '1px solid rgba(37,99,235,0.3)', fontSize: 14, fontWeight: 600, color: '#60a5fa', textDecoration: 'none', fontFamily: 'DM Sans, sans-serif' }}>
-                  Dashboard
-                </Link>
+                <>
+                  <Link
+                    href="/dashboard"
+                    style={{
+                      textAlign: 'center', padding: '11px', borderRadius: 8,
+                      background: 'rgba(37,99,235,0.12)', border: '1px solid rgba(37,99,235,0.3)',
+                      fontSize: 14, fontWeight: 600, color: '#60a5fa',
+                      textDecoration: 'none', fontFamily: 'DM Sans, sans-serif',
+                    }}
+                  >
+                    Dashboard
+                  </Link>
+
+                  {/* Mobile Admin Panel — only for admin */}
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setMobileOpen(false)}
+                      style={{
+                        textAlign: 'center', padding: '11px', borderRadius: 8,
+                        background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)',
+                        fontSize: 14, fontWeight: 600, color: '#f59e0b',
+                        textDecoration: 'none', fontFamily: 'DM Sans, sans-serif',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                      }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
+                        <circle cx="6" cy="6" r="5" stroke="#f59e0b" strokeWidth="1.5"/>
+                        <circle cx="6" cy="6" r="2" fill="#f59e0b"/>
+                      </svg>
+                      Admin Panel
+                    </Link>
+                  )}
+                </>
               ) : (
                 <>
-                  <Link href="/login" style={{ textAlign: 'center', padding: '11px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', fontSize: 14, fontWeight: 500, color: '#8b95b8', textDecoration: 'none', fontFamily: 'DM Sans, sans-serif' }}>
+                  <Link
+                    href="/login"
+                    style={{
+                      textAlign: 'center', padding: '11px', borderRadius: 8,
+                      background: 'transparent', border: '1px solid rgba(255,255,255,0.1)',
+                      fontSize: 14, fontWeight: 500, color: '#8b95b8',
+                      textDecoration: 'none', fontFamily: 'DM Sans, sans-serif',
+                    }}
+                  >
                     Log in
                   </Link>
-                  <Link href="/register" style={{ textAlign: 'center', padding: '11px', borderRadius: 8, background: '#2563eb', fontSize: 14, fontWeight: 600, color: '#fff', textDecoration: 'none', fontFamily: 'DM Sans, sans-serif' }}>
+                  <Link
+                    href="/register"
+                    style={{
+                      textAlign: 'center', padding: '11px', borderRadius: 8,
+                      background: '#2563eb', fontSize: 14, fontWeight: 600,
+                      color: '#fff', textDecoration: 'none', fontFamily: 'DM Sans, sans-serif',
+                    }}
+                  >
                     Get Started
                   </Link>
                 </>
@@ -857,7 +1040,7 @@ export default function Navbar() {
         )}
       </nav>
 
-      {/* ── Responsive: hide desktop nav / show burger on mobile ── */}
+      {/* ── Responsive ── */}
       <style>{`
         @media (max-width: 900px) {
           .dpbim-desktop-nav { display: none !important; }
