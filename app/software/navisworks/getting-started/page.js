@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { navisworksLessons } from '@/lib/navisworksLessonsData';
 
-const TOTAL_PLANNED = 12;
+const TOTAL_PLANNED = 24;
 
 const PLAN_ACCESS = {
   free:    (l) => l.free,
@@ -14,9 +14,20 @@ const PLAN_ACCESS = {
 };
 
 const tagStyle = {
-  navisworks:   { bg:'rgba(245,158,11,0.12)', color:'#fbbf24', border:'rgba(245,158,11,0.2)' },
-  coordination: { bg:'rgba(20,184,166,0.12)', color:'#2dd4bf', border:'rgba(20,184,166,0.2)' },
-  general:      { bg:'rgba(107,114,128,0.12)',color:'#9ca3af', border:'rgba(107,114,128,0.2)' },
+  navisworks:            { bg:'rgba(245,158,11,0.12)', color:'#fbbf24', border:'rgba(245,158,11,0.2)' },
+  Coordination:          { bg:'rgba(20,184,166,0.12)', color:'#2dd4bf', border:'rgba(20,184,166,0.2)' },
+  Scheduling:            { bg:'rgba(139,92,246,0.12)', color:'#a78bfa', border:'rgba(139,92,246,0.2)' },
+  Quantification:        { bg:'rgba(168,85,247,0.12)', color:'#c084fc', border:'rgba(168,85,247,0.2)' },
+  'Selection & Filtering': { bg:'rgba(37,99,235,0.12)',  color:'#60a5fa', border:'rgba(37,99,235,0.2)'  },
+  'Model Comparison':    { bg:'rgba(6,182,212,0.12)',  color:'#22d3ee', border:'rgba(6,182,212,0.2)'  },
+  'Point Clouds':        { bg:'rgba(234,179,8,0.12)',  color:'#facc15', border:'rgba(234,179,8,0.2)'  },
+  'Animation & Scripting': { bg:'rgba(99,102,241,0.12)', color:'#818cf8', border:'rgba(99,102,241,0.2)' },
+  Visualization:         { bg:'rgba(236,72,153,0.12)', color:'#f472b6', border:'rgba(236,72,153,0.2)' },
+  Automation:            { bg:'rgba(16,185,129,0.12)', color:'#34d399', border:'rgba(16,185,129,0.2)' },
+  'Cloud Coordination':  { bg:'rgba(14,165,233,0.12)', color:'#38bdf8', border:'rgba(14,165,233,0.2)' },
+  Performance:           { bg:'rgba(239,68,68,0.12)',  color:'#f87171', border:'rgba(239,68,68,0.2)'  },
+  Standards:             { bg:'rgba(139,92,246,0.12)', color:'#a78bfa', border:'rgba(139,92,246,0.2)' },
+  general:               { bg:'rgba(107,114,128,0.12)',color:'#9ca3af', border:'rgba(107,114,128,0.2)' },
 };
 
 const catColor = {
@@ -24,6 +35,8 @@ const catColor = {
   intermediate: { bg:'rgba(245,158,11,0.1)', c:'#fbbf24' },
   advanced:     { bg:'rgba(239,68,68,0.1)',  c:'#f87171' },
 };
+
+const topicLabel = (t) => t === 'navisworks' ? 'Navisworks' : t;
 
 function getPlanRequired(lesson) {
   if (lesson.free) return 'free';
@@ -85,8 +98,11 @@ export default function NavisworksGettingStartedPage() {
     return matchCat && matchTopic && matchSearch;
   });
 
-  const unlockedCount  = navisworksLessons.filter(l => canAccess(l)).length;
-  const completedCount = navisworksLessons.filter(l => completed.has(l.id)).length;
+  const topics          = [...new Set(navisworksLessons.map(l => l.topic))];
+  const unlockedCount   = navisworksLessons.filter(l => canAccess(l)).length;
+  const completedCount  = navisworksLessons.filter(l => completed.has(l.id)).length;
+  const freeCount       = navisworksLessons.filter(l => l.free).length;
+  const quizQuestions   = navisworksLessons.reduce((s, l) => s + (l.quiz?.questions || 10), 0);
 
   return (
     <main style={{ background:'#0a0e1a', color:'#e8eaf0', minHeight:'100vh', paddingTop:'80px', fontFamily:"'DM Sans',sans-serif" }}>
@@ -106,6 +122,22 @@ export default function NavisworksGettingStartedPage() {
           <div style={{ fontSize:'11px', fontWeight:500, letterSpacing:'2px', textTransform:'uppercase', color:'#f59e0b', marginBottom:'.5rem' }}>Software · Navisworks</div>
           <h1 style={{ fontFamily:"'Syne',sans-serif", fontSize:'2.2rem', fontWeight:800, letterSpacing:'-.5px', marginBottom:'.5rem' }}>Getting Started with Navisworks</h1>
           <p style={{ color:'#8892a4', fontSize:'15px' }}>A complete, international guide to model review and coordination. Learn to navigate, combine, and review federated models the right way, from the ground up.</p>
+        </div>
+
+        {/* Course stats strip */}
+        <div style={{ display:'flex', flexWrap:'wrap', gap:'1.5rem', marginBottom:'2rem', padding:'1rem 1.5rem', background:'rgba(245,158,11,0.04)', border:'1px solid rgba(245,158,11,0.12)', borderRadius:'12px', fontSize:'13px' }}>
+          {[
+            { label:'Total Lessons',   value:String(navisworksLessons.length) },
+            { label:'Quiz Questions',  value:String(quizQuestions) },
+            { label:'Skill Level',     value:'Beginner → Advanced' },
+            { label:'Plan Required',   value:'Free+' },
+            { label:'Last Updated',    value:'June 2026' },
+          ].map(s => (
+            <div key={s.label}>
+              <div style={{ fontSize:'10px', fontWeight:600, letterSpacing:'1px', color:'#8892a4', textTransform:'uppercase', marginBottom:'2px' }}>{s.label}</div>
+              <div style={{ fontWeight:600, color:'#e8eaf0' }}>{s.value}</div>
+            </div>
+          ))}
         </div>
 
         {/* Plan access banner */}
@@ -147,7 +179,7 @@ export default function NavisworksGettingStartedPage() {
 
         {/* Topic tabs */}
         <div style={{ display:'flex', flexWrap:'wrap', gap:'.4rem', marginBottom:'1.5rem' }}>
-          {[['all','All Topics'],['navisworks','Navisworks']].map(([val,label]) => (
+          {[['all','All Topics'], ...topics.map(t => [t, topicLabel(t)])].map(([val,label]) => (
             <button key={val} onClick={() => setActiveTopic(val)} style={{
               background: activeTopic===val?'rgba(255,255,255,0.06)':'transparent',
               border: `1px solid ${activeTopic===val?'rgba(255,255,255,0.15)':'rgba(255,255,255,0.08)'}`,
@@ -162,7 +194,7 @@ export default function NavisworksGettingStartedPage() {
         <div style={{ display:'flex', gap:'1.5rem', marginBottom:'2rem', flexWrap:'wrap', alignItems:'center', fontSize:'13px', color:'#8892a4' }}>
           <span><strong style={{ color:'#e8eaf0' }}>{filtered.length}</strong> lessons</span>
           <span style={{ width:'4px', height:'4px', borderRadius:'50%', background:'rgba(255,255,255,0.08)', display:'inline-block' }}/>
-          <span><strong style={{ color:'#e8eaf0' }}>{navisworksLessons.filter(l=>l.free).length}</strong> free previews</span>
+          <span><strong style={{ color:'#e8eaf0' }}>{freeCount}</strong> free previews</span>
           <span style={{ width:'4px', height:'4px', borderRadius:'50%', background:'rgba(255,255,255,0.08)', display:'inline-block' }}/>
           <span>Updated <strong style={{ color:'#e8eaf0' }}>June 2026</strong></span>
           {navisworksLessons.length < TOTAL_PLANNED && (
@@ -191,7 +223,7 @@ export default function NavisworksGettingStartedPage() {
                 <div key={l.id} style={{ background:'rgba(255,255,255,0.04)', border:`1px solid ${isDone?'rgba(34,197,94,0.2)':accessible?'rgba(255,255,255,0.08)':'rgba(255,255,255,0.05)'}`, borderRadius:'14px', overflow:'hidden', display:'flex', flexDirection:'column', opacity:accessible?1:0.75 }}>
                   <div style={{ padding:'1.25rem 1.25rem .75rem', flex:1 }}>
                     <div style={{ display:'flex', alignItems:'center', gap:'.4rem', marginBottom:'.75rem', flexWrap:'wrap' }}>
-                      <span style={{ fontSize:'11px', fontWeight:500, padding:'3px 10px', borderRadius:'5px', background:ts.bg, color:ts.color, border:`1px solid ${ts.border}` }}>Navisworks</span>
+                      <span style={{ fontSize:'11px', fontWeight:500, padding:'3px 10px', borderRadius:'5px', background:ts.bg, color:ts.color, border:`1px solid ${ts.border}` }}>{topicLabel(l.topic)}</span>
                       <span style={{ fontSize:'10px', fontWeight:600, padding:'2px 8px', borderRadius:'4px', background:cs.bg, color:cs.c, textTransform:'uppercase', letterSpacing:'.5px' }}>{l.cat}</span>
                       {l.free && <span style={{ fontSize:'10px', fontWeight:600, padding:'2px 8px', borderRadius:'4px', background:'rgba(34,197,94,0.1)', color:'#4ade80', border:'1px solid rgba(34,197,94,0.2)' }}>FREE</span>}
                       {isDone && <span style={{ fontSize:'10px', fontWeight:600, padding:'2px 8px', borderRadius:'4px', background:'rgba(34,197,94,0.1)', color:'#4ade80' }}>✓ Done</span>}
