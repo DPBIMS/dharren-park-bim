@@ -1,26 +1,244 @@
+'use client';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
+import { navisworksLessons } from '@/lib/navisworksLessonsData';
 
-export default function Page() {
+const TOTAL_PLANNED = 12;
+
+const PLAN_ACCESS = {
+  free:    (l) => l.free,
+  basic:   (l) => l.cat === 'beginner',
+  pro:     (l) => l.cat === 'beginner' || l.cat === 'intermediate',
+  premium: ()  => true,
+};
+
+const tagStyle = {
+  navisworks:   { bg:'rgba(245,158,11,0.12)', color:'#fbbf24', border:'rgba(245,158,11,0.2)' },
+  coordination: { bg:'rgba(20,184,166,0.12)', color:'#2dd4bf', border:'rgba(20,184,166,0.2)' },
+  general:      { bg:'rgba(107,114,128,0.12)',color:'#9ca3af', border:'rgba(107,114,128,0.2)' },
+};
+
+const catColor = {
+  beginner:     { bg:'rgba(34,197,94,0.1)',  c:'#4ade80' },
+  intermediate: { bg:'rgba(245,158,11,0.1)', c:'#fbbf24' },
+  advanced:     { bg:'rgba(239,68,68,0.1)',  c:'#f87171' },
+};
+
+function getPlanRequired(lesson) {
+  if (lesson.free) return 'free';
+  if (lesson.cat === 'beginner') return 'basic';
+  if (lesson.cat === 'intermediate') return 'pro';
+  return 'premium';
+}
+
+const planLabel = { free:'FREE', basic:'BASIC+', pro:'PRO+', premium:'PREMIUM' };
+const planBadgeStyle = {
+  free:    { bg:'rgba(34,197,94,0.1)',  c:'#4ade80' },
+  basic:   { bg:'rgba(107,114,128,0.1)',c:'#9ca3af' },
+  pro:     { bg:'rgba(37,99,235,0.1)',  c:'#60a5fa' },
+  premium: { bg:'rgba(245,158,11,0.1)', c:'#f59e0b' },
+};
+
+export default function NavisworksGettingStartedPage() {
+  const [activePlan,   setActivePlan]   = useState('free');
+  const [completed,    setCompleted]    = useState(new Set());
+  const [loading,      setLoading]      = useState(true);
+  const [activeCat,    setActiveCat]    = useState('all');
+  const [activeTopic,  setActiveTopic]  = useState('all');
+  const [search,       setSearch]       = useState('');
+
+  useEffect(() => {
+    async function load() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setLoading(false); return; }
+
+      const { data: planData } = await supabase
+        .from('user_plans').select('plan')
+        .eq('user_id', user.id).eq('status', 'active').single();
+      if (planData?.plan) setActivePlan(planData.plan);
+      else {
+        const { data: profile } = await supabase
+          .from('profiles').select('plan').eq('id', user.id).single();
+        setActivePlan(profile?.plan || 'free');
+      }
+
+      const { data: progress } = await supabase
+        .from('lesson_progress').select('lesson_id')
+        .eq('user_id', user.id).eq('completed', true);
+      if (progress) setCompleted(new Set(progress.map(p => String(p.lesson_id))));
+
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  function canAccess(lesson) {
+    const checker = PLAN_ACCESS[activePlan] || PLAN_ACCESS.free;
+    return checker(lesson);
+  }
+
+  const filtered = navisworksLessons.filter(l => {
+    const matchCat    = activeCat   === 'all' || l.cat   === activeCat;
+    const matchTopic  = activeTopic === 'all' || l.topic === activeTopic;
+    const matchSearch = !search || l.title.toLowerCase().includes(search.toLowerCase()) || l.desc.toLowerCase().includes(search.toLowerCase());
+    return matchCat && matchTopic && matchSearch;
+  });
+
+  const unlockedCount  = navisworksLessons.filter(l => canAccess(l)).length;
+  const completedCount = navisworksLessons.filter(l => completed.has(l.id)).length;
+
   return (
-    <main style={{ background:'#0a0e1a', color:'#e8eaf0', minHeight:'100vh', paddingTop:'80px', fontFamily:"'DM Sans',sans-serif", display:'flex', alignItems:'center', justifyContent:'center' }}>
-      <div style={{ maxWidth:'560px', width:'100%', padding:'2rem 1.5rem', textAlign:'center' }}>
-        <div style={{ width:'72px', height:'72px', borderRadius:'18px', background:'rgba(37,99,235,0.12)', border:'1px solid rgba(37,99,235,0.25)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'32px', margin:'0 auto 1.5rem' }}>
-          ▶
+    <main style={{ background:'#0a0e1a', color:'#e8eaf0', minHeight:'100vh', paddingTop:'80px', fontFamily:"'DM Sans',sans-serif" }}>
+      <div style={{ maxWidth:'1100px', margin:'0 auto', padding:'3rem 2rem' }}>
+
+        {/* Breadcrumb */}
+        <div style={{ fontSize:'12px', color:'#8892a4', marginBottom:'1.5rem', display:'flex', alignItems:'center', gap:'.5rem' }}>
+          <Link href="/" style={{ color:'#8892a4', textDecoration:'none' }}>Home</Link>
+          <span>›</span>
+          <Link href="/software" style={{ color:'#8892a4', textDecoration:'none' }}>Software</Link>
+          <span>›</span>
+          <span style={{ color:'#e8eaf0' }}>Navisworks — Getting Started</span>
         </div>
-        <div style={{ fontSize:'11px', fontWeight:600, letterSpacing:'2px', textTransform:'uppercase', color:'#3b82f6', marginBottom:'.75rem' }}>Software · Navisworks</div>
-        <h1 style={{ fontFamily:"'Syne',sans-serif", fontSize:'2rem', fontWeight:800, letterSpacing:'-.5px', marginBottom:'.75rem' }}>Navisworks — Getting Started</h1>
-        <p style={{ color:'#8892a4', fontSize:'14px', lineHeight:'1.7', maxWidth:'400px', margin:'0 auto 2rem' }}>Navigate, review, and annotate models in Navisworks — your complete beginner guide to the interface.</p>
-        <div style={{ display:'inline-flex', alignItems:'center', gap:'.5rem', background:'rgba(245,158,11,0.08)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:'100px', padding:'8px 20px', marginBottom:'2rem' }}>
-          <div style={{ width:'6px', height:'6px', borderRadius:'50%', background:'#f59e0b' }} />
-          <span style={{ fontSize:'13px', fontWeight:600, color:'#f59e0b' }}>Coming Soon — In Development</span>
+
+        {/* Header */}
+        <div style={{ marginBottom:'2.5rem' }}>
+          <div style={{ fontSize:'11px', fontWeight:500, letterSpacing:'2px', textTransform:'uppercase', color:'#f59e0b', marginBottom:'.5rem' }}>Software · Navisworks</div>
+          <h1 style={{ fontFamily:"'Syne',sans-serif", fontSize:'2.2rem', fontWeight:800, letterSpacing:'-.5px', marginBottom:'.5rem' }}>Getting Started with Navisworks</h1>
+          <p style={{ color:'#8892a4', fontSize:'15px' }}>A complete, international guide to model review and coordination. Learn to navigate, combine, and review federated models the right way, from the ground up.</p>
         </div>
-        <div style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:'14px', padding:'1.5rem', marginBottom:'1.5rem' }}>
-          <div style={{ fontSize:'13px', color:'#8892a4', lineHeight:'1.7' }}>This section is currently being developed. Check back soon or explore our existing BIM lessons while you wait.</div>
+
+        {/* Plan access banner */}
+        {!loading && activePlan !== 'free' && (
+          <div style={{ background:'rgba(37,99,235,0.06)', border:'1px solid rgba(37,99,235,0.2)', borderRadius:'10px', padding:'.75rem 1.25rem', marginBottom:'1.5rem', fontSize:'13px', color:'#93c5fd', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <span>✓ Logged in as <strong style={{ textTransform:'capitalize' }}>{activePlan} Plan</strong> — {unlockedCount} of {navisworksLessons.length} lessons unlocked · {completedCount} completed</span>
+            <Link href="/dashboard" style={{ color:'#3b82f6', fontSize:'12px', fontWeight:500, textDecoration:'none' }}>Go to Dashboard →</Link>
+          </div>
+        )}
+        {!loading && activePlan === 'free' && (
+          <div style={{ background:'rgba(245,158,11,0.06)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:'10px', padding:'.75rem 1.25rem', marginBottom:'1.5rem', fontSize:'13px', color:'#fbbf24', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <span>🔒 You have access to {navisworksLessons.filter(l=>l.free).length} free lessons. Upgrade to unlock the full Navisworks course.</span>
+            <Link href="/pricing" style={{ color:'#f59e0b', fontSize:'12px', fontWeight:600, textDecoration:'none' }}>Upgrade Now →</Link>
+          </div>
+        )}
+
+        {/* Filter Bar */}
+        <div style={{ display:'flex', flexWrap:'wrap', gap:'1rem', marginBottom:'1.5rem', alignItems:'center', justifyContent:'space-between' }}>
+          <div style={{ display:'flex', flexWrap:'wrap', gap:'.5rem' }}>
+            {[['all','All Levels'],['beginner','Beginner'],['intermediate','Intermediate'],['advanced','Advanced']].map(([val,label]) => (
+              <button key={val} onClick={() => setActiveCat(val)} style={{
+                background: activeCat===val
+                  ? val==='beginner'?'rgba(34,197,94,0.12)':val==='intermediate'?'rgba(245,158,11,0.12)':val==='advanced'?'rgba(239,68,68,0.12)':'rgba(37,99,235,0.15)'
+                  : 'rgba(255,255,255,0.04)',
+                border: `1px solid ${activeCat===val
+                  ? val==='beginner'?'rgba(34,197,94,0.3)':val==='intermediate'?'rgba(245,158,11,0.3)':val==='advanced'?'rgba(239,68,68,0.3)':'rgba(37,99,235,0.4)'
+                  : 'rgba(255,255,255,0.08)'}`,
+                borderRadius:'100px', padding:'6px 16px', fontSize:'13px', cursor:'pointer', fontFamily:"'DM Sans',sans-serif",
+                color: activeCat===val
+                  ? val==='beginner'?'#4ade80':val==='intermediate'?'#fbbf24':val==='advanced'?'#f87171':'#fff'
+                  : '#8892a4',
+              }}>{label}</button>
+            ))}
+          </div>
+          <input type="text" placeholder="🔍  Search lessons..." value={search} onChange={e => setSearch(e.target.value)}
+            style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'8px', padding:'8px 14px', color:'#e8eaf0', fontSize:'13px', fontFamily:"'DM Sans',sans-serif", outline:'none', width:'220px' }}
+          />
         </div>
-        <div style={{ display:'flex', gap:'.75rem', justifyContent:'center', flexWrap:'wrap' }}>
-          <Link href="/lessons" style={{ display:'inline-block', background:'#2563eb', color:'#fff', padding:'11px 24px', borderRadius:'8px', fontSize:'13px', fontWeight:600, textDecoration:'none' }}>Browse BIM Lessons →</Link>
-          <Link href="/" style={{ display:'inline-block', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.08)', color:'#e8eaf0', padding:'11px 24px', borderRadius:'8px', fontSize:'13px', fontWeight:500, textDecoration:'none' }}>Back to Home</Link>
+
+        {/* Topic tabs */}
+        <div style={{ display:'flex', flexWrap:'wrap', gap:'.4rem', marginBottom:'1.5rem' }}>
+          {[['all','All Topics'],['navisworks','Navisworks']].map(([val,label]) => (
+            <button key={val} onClick={() => setActiveTopic(val)} style={{
+              background: activeTopic===val?'rgba(255,255,255,0.06)':'transparent',
+              border: `1px solid ${activeTopic===val?'rgba(255,255,255,0.15)':'rgba(255,255,255,0.08)'}`,
+              borderRadius:'6px', padding:'4px 12px', fontSize:'12px',
+              color: activeTopic===val?'#e8eaf0':'#8892a4',
+              cursor:'pointer', fontFamily:"'DM Sans',sans-serif",
+            }}>{label}</button>
+          ))}
         </div>
+
+        {/* Stats */}
+        <div style={{ display:'flex', gap:'1.5rem', marginBottom:'2rem', flexWrap:'wrap', alignItems:'center', fontSize:'13px', color:'#8892a4' }}>
+          <span><strong style={{ color:'#e8eaf0' }}>{filtered.length}</strong> lessons</span>
+          <span style={{ width:'4px', height:'4px', borderRadius:'50%', background:'rgba(255,255,255,0.08)', display:'inline-block' }}/>
+          <span><strong style={{ color:'#e8eaf0' }}>{navisworksLessons.filter(l=>l.free).length}</strong> free previews</span>
+          <span style={{ width:'4px', height:'4px', borderRadius:'50%', background:'rgba(255,255,255,0.08)', display:'inline-block' }}/>
+          <span>Updated <strong style={{ color:'#e8eaf0' }}>June 2026</strong></span>
+          {navisworksLessons.length < TOTAL_PLANNED && (
+            <span style={{ marginLeft:'auto', background:'rgba(245,158,11,0.08)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:'100px', padding:'3px 12px', fontSize:'11px', color:'#f59e0b', fontWeight:600 }}>
+              • {TOTAL_PLANNED - navisworksLessons.length} more lessons coming soon
+            </span>
+          )}
+        </div>
+
+        {/* Lesson Grid */}
+        {filtered.length === 0 ? (
+          <div style={{ textAlign:'center', padding:'4rem 2rem', color:'#8892a4' }}>
+            <div style={{ fontSize:'2rem', marginBottom:'.5rem' }}>🔍</div>
+            <div>No lessons match your filters.</div>
+          </div>
+        ) : (
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'1.25rem' }}>
+            {filtered.map(l => {
+              const ts         = tagStyle[l.topic] || tagStyle.general;
+              const cs         = catColor[l.cat]   || catColor.beginner;
+              const accessible = canAccess(l);
+              const isDone     = completed.has(l.id);
+              const planReq    = getPlanRequired(l);
+              const pb         = planBadgeStyle[planReq];
+              return (
+                <div key={l.id} style={{ background:'rgba(255,255,255,0.04)', border:`1px solid ${isDone?'rgba(34,197,94,0.2)':accessible?'rgba(255,255,255,0.08)':'rgba(255,255,255,0.05)'}`, borderRadius:'14px', overflow:'hidden', display:'flex', flexDirection:'column', opacity:accessible?1:0.75 }}>
+                  <div style={{ padding:'1.25rem 1.25rem .75rem', flex:1 }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:'.4rem', marginBottom:'.75rem', flexWrap:'wrap' }}>
+                      <span style={{ fontSize:'11px', fontWeight:500, padding:'3px 10px', borderRadius:'5px', background:ts.bg, color:ts.color, border:`1px solid ${ts.border}` }}>Navisworks</span>
+                      <span style={{ fontSize:'10px', fontWeight:600, padding:'2px 8px', borderRadius:'4px', background:cs.bg, color:cs.c, textTransform:'uppercase', letterSpacing:'.5px' }}>{l.cat}</span>
+                      {l.free && <span style={{ fontSize:'10px', fontWeight:600, padding:'2px 8px', borderRadius:'4px', background:'rgba(34,197,94,0.1)', color:'#4ade80', border:'1px solid rgba(34,197,94,0.2)' }}>FREE</span>}
+                      {isDone && <span style={{ fontSize:'10px', fontWeight:600, padding:'2px 8px', borderRadius:'4px', background:'rgba(34,197,94,0.1)', color:'#4ade80' }}>✓ Done</span>}
+                    </div>
+                    <div style={{ fontSize:'11px', color:'#8892a4', marginBottom:'.4rem' }}>Lesson {l.num}</div>
+                    <div style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:'15px', lineHeight:'1.35', marginBottom:'.5rem' }}>{l.title}</div>
+                    {accessible && <div style={{ fontSize:'13px', color:'#8892a4', lineHeight:'1.65' }}>{l.desc}</div>}
+                    {!accessible && (
+                      <div style={{ display:'flex', alignItems:'center', gap:'6px', marginTop:'.25rem' }}>
+                        <span style={{ fontSize:'11px', fontWeight:600, padding:'2px 9px', borderRadius:'100px', background:pb.bg, color:pb.c }}>{planLabel[planReq]}</span>
+                        <span style={{ fontSize:'12px', color:'#6b7280' }}>required to unlock</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Footer */}
+                  <div style={{ padding:'.75rem 1.25rem', borderTop:'1px solid rgba(255,255,255,0.06)', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                    <span style={{ fontSize:'11px', color:'#8892a4' }}>⏱ {l.readTime}{l.quiz ? ' · 📝 Quiz' : ''}</span>
+                    {accessible ? (
+                      <Link href={`/software/navisworks/getting-started/${l.id}`} style={{ fontSize:'12px', color:'#3b82f6', fontWeight:500, textDecoration:'none', display:'flex', alignItems:'center', gap:'4px' }}>
+                        {isDone ? '✓ Review' : 'Read lesson'} <span>→</span>
+                      </Link>
+                    ) : (
+                      <div style={{ display:'flex', alignItems:'center', gap:'.5rem' }}>
+                        <span>🔒</span>
+                        <Link href="/pricing" style={{ fontSize:'12px', color:'#3b82f6', textDecoration:'none' }}>View Plans</Link>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Coming soon placeholder cards */}
+        {navisworksLessons.length < TOTAL_PLANNED && activeCat === 'all' && !search && (
+          <div style={{ marginTop:'1.25rem', display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'1.25rem' }}>
+            {Array.from({ length: Math.min(3, TOTAL_PLANNED - navisworksLessons.length) }).map((_, i) => (
+              <div key={i} style={{ background:'rgba(255,255,255,0.02)', border:'1px dashed rgba(255,255,255,0.06)', borderRadius:'14px', padding:'1.25rem', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'160px', textAlign:'center', gap:'.5rem' }}>
+                <div style={{ fontSize:'11px', fontWeight:600, padding:'2px 10px', borderRadius:'100px', background:'rgba(245,158,11,0.08)', border:'1px solid rgba(245,158,11,0.15)', color:'#f59e0b' }}>Coming Soon</div>
+                <div style={{ fontSize:'12px', color:'#4a5568' }}>More lessons in development</div>
+              </div>
+            ))}
+          </div>
+        )}
+
       </div>
     </main>
   );

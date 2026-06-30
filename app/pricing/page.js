@@ -7,6 +7,7 @@ const plans = [
   { name: 'basic',   label: 'Basic',   desc: 'For beginners starting their BIM journey.',     monthly: 299,  annual: 239,  features: ['Full access to BIM articles','Core lessons & topics','Beginner learning path'],                                          unavail: ['Downloadable PDFs','Quizzes & assessments','Video lessons'],       featured: false },
   { name: 'pro',     label: 'Pro',     desc: 'For students serious about BIM careers.',        monthly: 599,  annual: 479,  features: ['Everything in Basic','Downloadable PDFs','Quizzes & assessments','Intermediate lessons'],                               unavail: ['Video lessons','3D model resources'],                               featured: true  },
   { name: 'premium', label: 'Premium', desc: 'Full access to everything, now and future.',     monthly: 999,  annual: 799,  features: ['Everything in Pro','Video lessons (coming soon)','3D model resources','Priority support','Early access','Certificate'], unavail: [],                                                                  featured: false },
+  { name: 'master',  label: 'Master',  desc: 'For studios & teams managing BIM at scale.',     monthly: 1999, annual: 1599, features: ['Everything in Premium','Revit Matrix portfolio dashboard','Company-level compliance audits','Multi-project standards tracking'], unavail: [],                                                          featured: false },
 ];
 
 const methods = [
@@ -121,9 +122,9 @@ export default function PricingPage() {
         </div>
 
         {/* Plans Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '1.25rem', marginBottom: '2.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '1rem', marginBottom: '2.5rem' }}>
           {plans.map(p => (
-            <div key={p.name} onClick={() => setSelectedPlan(p.name)} style={{ background: selectedPlan === p.name ? 'rgba(37,99,235,0.07)' : 'rgba(255,255,255,0.04)', border: `1px solid ${selectedPlan === p.name ? '#2563eb' : p.featured ? 'rgba(37,99,235,0.4)' : 'rgba(255,255,255,0.08)'}`, borderRadius: '16px', padding: '1.75rem', position: 'relative', cursor: 'pointer', transition: 'all .2s' }}>
+            <div key={p.name} onClick={() => setSelectedPlan(p.name)} style={{ background: selectedPlan === p.name ? 'rgba(37,99,235,0.07)' : 'rgba(255,255,255,0.04)', border: `1px solid ${selectedPlan === p.name ? '#2563eb' : p.featured ? 'rgba(37,99,235,0.4)' : 'rgba(255,255,255,0.08)'}`, borderRadius: '16px', padding: '1.5rem', position: 'relative', cursor: 'pointer', transition: 'all .2s' }}>
               {p.featured && <div style={{ position: 'absolute', top: '-11px', left: '50%', transform: 'translateX(-50%)', background: '#2563eb', color: '#fff', fontSize: '10px', fontWeight: 600, padding: '3px 12px', borderRadius: '100px', whiteSpace: 'nowrap' }}>Most Popular</div>}
               {selectedPlan === p.name && <div style={{ position: 'absolute', top: '14px', right: '14px', width: '18px', height: '18px', borderRadius: '50%', background: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>✓</div>}
               <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '15px', marginBottom: '.2rem' }}>{p.label}</div>

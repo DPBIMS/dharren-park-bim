@@ -74,7 +74,7 @@ const NAV_ITEMS = [
             label: 'Revit Matrix',
             sub: 'Company-level BIM management',
             href: '/software/revit/matrix',
-            badge: 'Soon',
+            status: 'live',
           },
         ],
       },
@@ -113,6 +113,7 @@ const NAV_ITEMS = [
             label: 'Getting started',
             sub: 'Navigation & review',
             href: '/software/navisworks/getting-started',
+            status: 'live',
           },
           {
             icon: 'zap',
@@ -296,6 +297,8 @@ const NAV_ITEMS = [
     ],
   },
 ];
+
+const ADMIN_EMAILS = ['dharrenpark2024@gmail.com'];
 
 // ─── TIER CONFIG ─────────────────────────────────────────────────────────────
 
@@ -556,20 +559,14 @@ export default function Navbar() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      if (session?.user) checkAdmin(session.user.id);
+      setIsAdmin(ADMIN_EMAILS.includes(session?.user?.email));
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
       setUser(session?.user ?? null);
-      if (session?.user) checkAdmin(session.user.id);
-      else setIsAdmin(false);
+      setIsAdmin(ADMIN_EMAILS.includes(session?.user?.email));
     });
     return () => subscription.unsubscribe();
   }, []);
-
-  async function checkAdmin(uid) {
-    const { data } = await supabase.from('profiles').select('role').eq('id', uid).single();
-    setIsAdmin(data?.role === 'admin');
-  }
 
   async function handleSignOut() {
     await supabase.auth.signOut();

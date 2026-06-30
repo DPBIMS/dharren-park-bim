@@ -56,6 +56,7 @@ const planColor = {
   basic:   { bg:'rgba(34,197,94,0.15)',   c:'#4ade80' },
   pro:     { bg:'rgba(37,99,235,0.15)',   c:'#60a5fa' },
   premium: { bg:'rgba(245,158,11,0.15)',  c:'#f59e0b' },
+  master:  { bg:'rgba(139,92,246,0.15)',  c:'#a78bfa' },
 };
 const statusColor = {
   pending:   { bg:'rgba(245,158,11,0.12)', c:'#fbbf24' },
@@ -334,8 +335,8 @@ export default function AdminPage() {
         {/* ── STUDENTS TAB ── */}
         {activeTab === 'students' && (
           <>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'1rem', marginBottom:'2rem' }}>
-              {[{label:'TOTAL STUDENTS',value:students.length,color:'#e8eaf0'},{label:'FREE',value:students.filter(s=>s.plan==='free').length,color:'#9ca3af'},{label:'PRO',value:students.filter(s=>s.plan==='pro').length,color:'#60a5fa'},{label:'PREMIUM',value:students.filter(s=>s.plan==='premium').length,color:'#f59e0b'}].map(s=>(
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:'1rem', marginBottom:'2rem' }}>
+              {[{label:'TOTAL STUDENTS',value:students.length,color:'#e8eaf0'},{label:'FREE',value:students.filter(s=>s.plan==='free').length,color:'#9ca3af'},{label:'PRO',value:students.filter(s=>s.plan==='pro').length,color:'#60a5fa'},{label:'PREMIUM',value:students.filter(s=>s.plan==='premium').length,color:'#f59e0b'},{label:'MASTER',value:students.filter(s=>s.plan==='master').length,color:'#a78bfa'}].map(s=>(
                 <div key={s.label} style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'12px', padding:'1.1rem 1.25rem' }}>
                   <div style={{ fontSize:'10px', fontWeight:600, letterSpacing:'1px', color:'#8892a4', marginBottom:'.4rem' }}>{s.label}</div>
                   <div style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:'1.8rem', color:s.color }}>{studentsLoading?'...':s.value}</div>
@@ -452,7 +453,7 @@ export default function AdminPage() {
                 </div>
                 <div style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'14px', padding:'1.5rem' }}>
                   <div style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:'14px', marginBottom:'1.25rem', paddingBottom:'.75rem', borderBottom:'1px solid rgba(255,255,255,0.08)' }}>👥 Students by Plan</div>
-                  <DonutChart data={[{label:'Free',value:analytics.students.byPlan.free||0,color:'#6b7280'},{label:'Basic',value:analytics.students.byPlan.basic||0,color:'#4ade80'},{label:'Pro',value:analytics.students.byPlan.pro||0,color:'#3b82f6'},{label:'Premium',value:analytics.students.byPlan.premium||0,color:'#f59e0b'}].filter(d=>d.value>0)}/>
+                  <DonutChart data={[{label:'Free',value:analytics.students.byPlan.free||0,color:'#6b7280'},{label:'Basic',value:analytics.students.byPlan.basic||0,color:'#4ade80'},{label:'Pro',value:analytics.students.byPlan.pro||0,color:'#3b82f6'},{label:'Premium',value:analytics.students.byPlan.premium||0,color:'#f59e0b'},{label:'Master',value:analytics.students.byPlan.master||0,color:'#a78bfa'}].filter(d=>d.value>0)}/>
                 </div>
               </div>
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1.5rem' }}>
