@@ -286,7 +286,7 @@ const passedCount  = takenQuizzes.filter(q => q.passed).length;
     { id:'lessons',      icon:'📚', label:'My Lessons'   },
     { id:'quizzes',      icon:'📝', label:'Quiz Scores'  },
     { id:'resources',    icon:'📁', label:'Resources'    },
-    ...(isPremium ? [{ id:'certificate', icon:'🎓', label:'Certificate' }] : []),
+    ...(isAdmin ? [{ id:'certificate', icon:'🎓', label:'Certificate' }] : []),
   ];
 
   // Active course data for lessons panel
@@ -358,7 +358,7 @@ const passedCount  = takenQuizzes.filter(q => q.passed).length;
                   <div className="ann-text">You are on the Free plan. <Link href="/pricing" style={{ color:'#3b82f6', fontWeight:600 }}>Upgrade to Pro or Premium</Link> to access all lessons across every course.</div>
                 </div>
               </div>
-            ) : canGetCert ? (
+            ) : (isAdmin && canGetCert) ? (
               <div className="announcement" style={{ borderColor:'rgba(245,158,11,0.3)', background:'rgba(245,158,11,0.06)' }}>
                 <span className="ann-icon">🎓</span>
                 <div>
