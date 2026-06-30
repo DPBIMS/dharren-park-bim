@@ -52,6 +52,34 @@ const revitLessons = [
   { id:'rv-24', num:'24', title:'Performance, File Health & Large Projects',        cat:'advanced',     topic:'BIM Management',  free:false },
 ];
 
+// ── Navisworks Getting Started Lessons (nav-1 to nav-24) ──────────
+const navisworksLessons = [
+  { id:'nav-1',  num:'01', title:'What is Navisworks? Purpose, History & Role in BIM Coordination', cat:'beginner',     topic:'Navisworks Basics', free:true  },
+  { id:'nav-2',  num:'02', title:'The Navisworks Interface: Every Panel Explained',                  cat:'beginner',     topic:'Navisworks Basics', free:true  },
+  { id:'nav-3',  num:'03', title:'Opening & Appending Models: NWC, NWD & NWF Explained',              cat:'beginner',     topic:'Navisworks Basics', free:true  },
+  { id:'nav-4',  num:'04', title:'Clash Detective Fundamentals: Running Your First Clash Test',       cat:'beginner',     topic:'Coordination',      free:false },
+  { id:'nav-5',  num:'05', title:'Managing Clash Results: Grouping, Assigning & Status Workflow',     cat:'beginner',     topic:'Coordination',      free:false },
+  { id:'nav-6',  num:'06', title:'TimeLiner: Linking Your Model to a Construction Schedule (4D)',     cat:'intermediate', topic:'Scheduling',        free:false },
+  { id:'nav-7',  num:'07', title:'Markup, Redlining & Viewpoints for Coordination Meetings',          cat:'intermediate', topic:'Coordination',      free:false },
+  { id:'nav-8',  num:'08', title:'Quantification: Extracting Takeoffs from the Federated Model',      cat:'intermediate', topic:'Quantification',    free:false },
+  { id:'nav-9',  num:'09', title:'Advanced Selection: Search Sets, Property Filters & Find Items',    cat:'intermediate', topic:'Selection & Filtering', free:false },
+  { id:'nav-10', num:'10', title:'Comparing Models: Detecting Design Changes Between Versions',       cat:'intermediate', topic:'Model Comparison',  free:false },
+  { id:'nav-11', num:'11', title:'Working with Point Clouds: Scan-to-BIM Comparison in Navisworks',   cat:'advanced',     topic:'Point Clouds',      free:false },
+  { id:'nav-12', num:'12', title:'Animator: Creating Custom Object Animations',                       cat:'advanced',     topic:'Animation & Scripting', free:false },
+  { id:'nav-13', num:'13', title:'Scripter: Automating Interactive Behaviors Without Programming',    cat:'advanced',     topic:'Animation & Scripting', free:false },
+  { id:'nav-14', num:'14', title:'Sectioning & Section Boxes: Isolating Zones for Review',            cat:'intermediate', topic:'Coordination',      free:false },
+  { id:'nav-15', num:'15', title:'Materials, Appearance & Render Style for Presentation-Quality Visuals', cat:'intermediate', topic:'Visualization', free:false },
+  { id:'nav-16', num:'16', title:'Autodesk Rendering: Producing Photorealistic Stills and Walkthroughs', cat:'advanced',  topic:'Visualization',     free:false },
+  { id:'nav-17', num:'17', title:'Batch Utility: Automating NWC Conversion at Scale',                  cat:'advanced',     topic:'Automation',        free:false },
+  { id:'nav-18', num:'18', title:'Cloud Coordination: Model Coordination on Autodesk Construction Cloud', cat:'advanced', topic:'Cloud Coordination', free:false },
+  { id:'nav-19', num:'19', title:'BCF Workflow: Issue Exchange Between Navisworks and Authoring Tools', cat:'intermediate', topic:'Coordination',    free:false },
+  { id:'nav-20', num:'20', title:'Navisworks API & Add-ins: Extending Navisworks with Automation',     cat:'advanced',     topic:'Automation',        free:false },
+  { id:'nav-21', num:'21', title:'Performance Optimization: Working with Very Large Federated Models', cat:'advanced',     topic:'Performance',       free:false },
+  { id:'nav-22', num:'22', title:'File Compatibility: Reading Proprietary and Legacy CAD Formats',     cat:'intermediate', topic:'Selection & Filtering', free:false },
+  { id:'nav-23', num:'23', title:'Navisworks in an ISO 19650 Workflow: Roles, Responsibilities & Deliverables', cat:'intermediate', topic:'Standards', free:false },
+  { id:'nav-24', num:'24', title:'Capstone: Running a Full Weekly Coordination Cycle End-to-End',      cat:'advanced',     topic:'Coordination',      free:false },
+];
+
 // ── Revit Project Setup Lessons (ps-1 to ps-24) ───────────────────
 const setupLessons = [
   { id:'ps-1',  num:'01', title:'Why Project Setup Matters',                         cat:'beginner',     topic:'Introduction',    free:true  },
@@ -108,6 +136,15 @@ const COURSES = [
     lessons: setupLessons,
     path: '/software/revit/project-setup',
     quizPath: (id) => `/software/revit/project-setup/${id}/quiz`,
+  },
+  {
+    id: 'navisworks',
+    label: 'Navisworks Getting Started',
+    icon: '▶',
+    color: '#fbbf24',
+    lessons: navisworksLessons,
+    path: '/software/navisworks/getting-started',
+    quizPath: (id) => `/software/navisworks/getting-started/${id}/quiz`,
   },
 ];
 
@@ -245,7 +282,7 @@ export default function DashboardPage() {
   const bimCompleted  = bimLessons.filter(l => completed.has(String(l.id))).length;
 
   // Total across all courses
-  const allLessons     = [...bimLessons, ...revitLessons, ...setupLessons];
+  const allLessons     = [...bimLessons, ...revitLessons, ...setupLessons, ...navisworksLessons];
   const totalUnlocked  = allLessons.filter(l => canAccessLesson(l)).length;
   const totalCompleted = allLessons.filter(l => completed.has(String(l.id))).length;
 
