@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { revitSetupLessons } from '@/lib/revitSetupLessonsData';
+import AdminOnlyGate from '@/components/AdminOnlyGate';
 
 const PLAN_ACCESS = {
   free:    (l) => l.free,
@@ -103,6 +104,7 @@ export default function RevitProjectSetupPage() {
   const freeCount      = revitSetupLessons.filter(l => l.free).length;
 
   return (
+    <AdminOnlyGate title="Revit Project Setup" backHref="/software/revit/getting-started" backLabel="← Back to Revit">
     <main style={{ background:'#0a0e1a', color:'#e8eaf0', minHeight:'100vh', paddingTop:'80px', fontFamily:"'DM Sans',sans-serif" }}>
       <div style={{ maxWidth:'1100px', margin:'0 auto', padding:'3rem 2rem' }}>
 
@@ -291,5 +293,6 @@ export default function RevitProjectSetupPage() {
 
       </div>
     </main>
+    </AdminOnlyGate>
   );
 }

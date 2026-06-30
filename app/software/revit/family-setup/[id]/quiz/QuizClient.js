@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import AdminOnlyGate from '@/components/AdminOnlyGate';
 
 const PLAN_ACCESS = {
   free:    (l) => l.free,
@@ -11,7 +12,15 @@ const PLAN_ACCESS = {
   premium: ()  => true,
 };
 
-export default function FamilySetupQuizClient({ quiz, lesson }) {
+export default function FamilySetupQuizClient(props) {
+  return (
+    <AdminOnlyGate title="Revit Family Setup" backHref="/software/revit/family-setup" backLabel="← Back to Family Setup">
+      <FamilySetupQuizClientInner {...props} />
+    </AdminOnlyGate>
+  );
+}
+
+function FamilySetupQuizClientInner({ quiz, lesson }) {
   const router = useRouter();
   const [activePlan,  setActivePlan]  = useState('free');
   const [answers,     setAnswers]     = useState({});

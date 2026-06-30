@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { revitFamilySetupLessons } from '@/lib/revitFamilySetupLessonsData';
+import AdminOnlyGate from '@/components/AdminOnlyGate';
 
 const PLAN_ACCESS = {
   free:    (l) => l.free,
@@ -94,6 +95,7 @@ export default function RevitFamilySetupPage() {
   const freeCount      = revitFamilySetupLessons.filter(l => l.free).length;
 
   return (
+    <AdminOnlyGate title="Revit Family Setup" backHref="/software/revit/families" backLabel="← Back to Revit Families">
     <main style={{ background:'#0a0e1a', color:'#e8eaf0', minHeight:'100vh', paddingTop:'80px', fontFamily:"'DM Sans',sans-serif" }}>
       <div style={{ maxWidth:'1100px', margin:'0 auto', padding:'3rem 2rem' }}>
 
@@ -266,5 +268,6 @@ export default function RevitFamilySetupPage() {
 
       </div>
     </main>
+    </AdminOnlyGate>
   );
 }

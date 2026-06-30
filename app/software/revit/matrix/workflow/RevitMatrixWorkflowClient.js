@@ -44,10 +44,13 @@ export default function RevitMatrixWorkflowClient({ workflows }) {
     load();
   }, []);
 
+  // TEMPORARY: Revit Matrix is admin-only while under review, regardless of plan.
+  // To reopen to Master-plan subscribers, change this back to:
+  //   if (isAdmin) return true;
+  //   const checker = PLAN_ACCESS[activePlan] || PLAN_ACCESS.free;
+  //   return checker();
   function canAccess() {
-    if (isAdmin) return true;
-    const checker = PLAN_ACCESS[activePlan] || PLAN_ACCESS.free;
-    return checker();
+    return isAdmin;
   }
 
   const accessible = canAccess();
@@ -57,20 +60,16 @@ export default function RevitMatrixWorkflowClient({ workflows }) {
     return (
       <main style={{ background: '#0a0e1a', color: '#e8eaf0', minHeight: '100vh', paddingTop: '80px', fontFamily: "'DM Sans',sans-serif" }}>
         <div style={{ maxWidth: '720px', margin: '0 auto', padding: '4rem 2rem', textAlign: 'center' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>
+          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🚧</div>
           <h1 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '1.6rem', marginBottom: '.75rem' }}>
             Workflow & Process Flow
           </h1>
           <p style={{ color: '#8892a4', fontSize: '14px', marginBottom: '2rem' }}>
-            This is a practice-level governance tool, available exclusively on the{' '}
-            <strong style={{ color: '#2563eb' }}>Master</strong> plan.
+            We're putting the finishing touches on this tool before opening it up. Check back soon!
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/pricing" style={{ background: '#2563eb', color: '#fff', padding: '12px 28px', borderRadius: '8px', fontWeight: 600, textDecoration: 'none', fontSize: '14px' }}>
-              Upgrade to Master →
-            </Link>
             <Link href="/software/revit/matrix" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#e8eaf0', padding: '12px 28px', borderRadius: '8px', fontWeight: 500, textDecoration: 'none', fontSize: '14px' }}>
-              Back to Dashboard
+              Back to Matrix
             </Link>
           </div>
         </div>
