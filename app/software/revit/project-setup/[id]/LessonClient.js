@@ -89,10 +89,13 @@ export default function SetupLessonClient(props) {
 
 function SetupLessonClientInner({ lesson, allLessons }) {
   const router = useRouter();
-  const [activePlan, setActivePlan] = useState('free');
-  const [isComplete, setIsComplete] = useState(false);
-  const [loading,    setLoading]    = useState(true);
-  const [user,       setUser]       = useState(null);
+  const [activePlan,    setActivePlan]    = useState('free');
+  const [isComplete,    setIsComplete]    = useState(false);
+  const [loading,       setLoading]       = useState(true);
+  const [user,          setUser]          = useState(null);
+  const [activeSection, setActiveSection] = useState('section-0');
+
+  const normalizedSections = lesson.sections?.map((s, i) => ({ ...s, id: s.id || `section-${i}` })) || [];
 
   useEffect(() => {
     async function load() {
@@ -157,7 +160,7 @@ function SetupLessonClientInner({ lesson, allLessons }) {
   // Locked screen
   if (!loading && !accessible) {
     return (
-      <main style={{ background:'#0a0e1a', color:'#e8eaf0', minHeight:'100vh', paddingTop:'80px', fontFamily:"'DM Sans',sans-serif" }}>
+      <main style={{ background:'#000', color:'#e8eaf0', minHeight:'100vh', paddingTop:'80px', fontFamily:"'DM Sans',sans-serif" }}>
         <div style={{ maxWidth:'720px', margin:'0 auto', padding:'4rem 2rem', textAlign:'center' }}>
           <div style={{ fontSize:'3rem', marginBottom:'1rem' }}>🔒</div>
           <h1 style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:'1.6rem', marginBottom:'.75rem' }}>{lesson.title}</h1>
@@ -180,36 +183,29 @@ function SetupLessonClientInner({ lesson, allLessons }) {
   }
 
   return (
-    <main style={{ background:'#0a0e1a', color:'#e8eaf0', minHeight:'100vh', paddingTop:'80px', fontFamily:"'DM Sans',sans-serif" }}>
+    <div style={{ background:'#000', color:'#e8eaf0', minHeight:'100vh', fontFamily:"'DM Sans',sans-serif" }}>
 
       {/* Top bar */}
-      <div style={{ borderBottom:'1px solid rgba(255,255,255,0.06)', padding:'.85rem 2rem', display:'flex', alignItems:'center', justifyContent:'space-between', maxWidth:'1100px', margin:'0 auto', flexWrap:'wrap', gap:'1rem' }}>
-        <div style={{ display:'flex', alignItems:'center', gap:'1.25rem', fontSize:'13px', color:'#8892a4' }}>
-          <Link href="/software/revit/project-setup" style={{ color:'#8892a4', textDecoration:'none' }}>
-            ← Back to Project Setup
-          </Link>
-          <span style={{ color:'rgba(255,255,255,0.12)' }}>|</span>
-          <span>Lesson <strong style={{ color:'#e8eaf0' }}>{String(lesson.num).padStart(2,'0')}</strong> of {allLessons.length}</span>
+      <div style={{ position:'fixed', top:'64px', left:0, right:0, zIndex:90, background:'rgba(10,14,26,0.95)', backdropFilter:'blur(12px)', borderBottom:'1px solid rgba(255,255,255,0.07)', height:'48px', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 1.5rem' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:'1rem', fontSize:'13px' }}>
+          <Link href="/software/revit/project-setup" style={{ color:'#8892a4', textDecoration:'none' }}>← Back to Project Setup</Link>
+          <div style={{ width:'1px', height:'16px', background:'rgba(255,255,255,0.1)' }} />
+          <span style={{ color:'#8892a4' }}>Lesson <strong style={{ color:'#e8eaf0' }}>{String(lesson.num).padStart(2,'0')}</strong> of {allLessons.length}</span>
         </div>
         <button
           onClick={handleToggleComplete}
           disabled={loading}
-          style={{
-            padding:'7px 18px', borderRadius:'8px', fontSize:'13px', fontWeight:600,
-            cursor: loading ? 'default' : 'pointer', fontFamily:"'DM Sans',sans-serif",
-            background: isComplete ? 'rgba(16,185,129,0.12)' : 'rgba(16,185,129,0.08)',
-            border: `1px solid ${isComplete ? 'rgba(16,185,129,0.4)' : 'rgba(16,185,129,0.25)'}`,
-            color: '#10b981',
-          }}
-        >
-          {isComplete ? '✓ Completed' : 'Mark Complete'}
+          style={{ display:'flex', alignItems:'center', gap:'.4rem', padding:'5px 14px', borderRadius:'7px', border:`1px solid ${isComplete?'rgba(34,197,94,0.3)':'rgba(255,255,255,0.1)'}`, background:isComplete?'rgba(34,197,94,0.1)':'rgba(255,255,255,0.04)', color:isComplete?'#4ade80':'#8892a4', fontSize:'12px', fontWeight:600, cursor: loading ? 'default' : 'pointer', fontFamily:"'DM Sans',sans-serif" }}>
+          <span>{isComplete?'✓':'○'}</span>
+          <span>{isComplete?'Completed':'Mark Complete'}</span>
         </button>
       </div>
 
-      <div style={{ maxWidth:'800px', margin:'0 auto', padding:'3rem 2rem 5rem' }}>
+      {/* Layout */}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 280px', maxWidth:'1200px', margin:'0 auto', padding:'2rem 1.5rem 4rem', gap:'2.5rem', paddingTop:'calc(48px + 1rem)' }}>
 
-        {/* Category stripe */}
-        <div style={{ height:'3px', borderRadius:'2px', background: lesson.cat === 'beginner' ? 'linear-gradient(90deg,#4ade80,#22c55e)' : lesson.cat === 'intermediate' ? 'linear-gradient(90deg,#fbbf24,#f59e0b)' : 'linear-gradient(90deg,#f87171,#ef4444)', marginBottom:'1.5rem' }} />
+      {/* Main content */}
+      <div style={{ maxWidth:'800px' }}>
 
         {/* Meta */}
         <div style={{ display:'flex', alignItems:'center', gap:'.5rem', flexWrap:'wrap', marginBottom:'1.25rem' }}>
@@ -240,9 +236,9 @@ function SetupLessonClientInner({ lesson, allLessons }) {
         </div>
 
         {/* Sections */}
-        {lesson.sections?.map((section, i) => (
-          <div key={i} style={{ marginBottom:'2.5rem', padding:'1.5rem', background: catGradient, border:'1px solid rgba(255,255,255,0.06)', borderRadius:'14px' }}>
-            <h2 style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:'1.15rem', marginBottom:'1.25rem', color:'#e8eaf0', paddingBottom:'.75rem', borderBottom:'1px solid rgba(255,255,255,0.08)' }}>
+        {normalizedSections.map(section => (
+          <div key={section.id} id={section.id} style={{ marginBottom:'2.5rem', padding:'1.5rem', background: catGradient, border:'1px solid rgba(255,255,255,0.06)', borderRadius:'14px' }}>
+            <h2 style={{ fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:'1.15rem', marginBottom:'1.25rem', color:'#10b981', paddingBottom:'.75rem', borderBottom:'1px solid rgba(255,255,255,0.08)' }}>
               {section.title}
             </h2>
             <LessonContent content={section.content} />
@@ -323,6 +319,46 @@ function SetupLessonClientInner({ lesson, allLessons }) {
         </div>
 
       </div>
-    </main>
+
+      {/* Sidebar */}
+      <div style={{ position:'sticky', top:'calc(64px + 48px + 1.5rem)', alignSelf:'start', display:'flex', flexDirection:'column', gap:'1rem' }}>
+
+        {/* Table of contents */}
+        {normalizedSections.length > 0 && (
+          <div style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'12px', padding:'1.25rem' }}>
+            <div style={{ fontSize:'11px', fontWeight:700, letterSpacing:'1px', color:'#6b7280', textTransform:'uppercase', marginBottom:'.75rem' }}>📋 In This Lesson</div>
+            <div style={{ display:'flex', flexDirection:'column', gap:'2px' }}>
+              {normalizedSections.map(s => (
+                <div
+                  key={s.id}
+                  onClick={() => { setActiveSection(s.id); document.getElementById(s.id)?.scrollIntoView({ behavior:'smooth' }); }}
+                  style={{ fontSize:'12px', padding:'5px 8px', borderRadius:'6px', cursor:'pointer', color:activeSection===s.id?'#34d399':'#8892a4', background:activeSection===s.id?'rgba(16,185,129,0.08)':'transparent', transition:'all .15s', lineHeight:'1.4' }}
+                >{s.title}</div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* All lessons in this course */}
+        <div style={{ background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'12px', padding:'1.25rem' }}>
+          <div style={{ fontSize:'11px', fontWeight:700, letterSpacing:'1px', color:'#6b7280', textTransform:'uppercase', marginBottom:'.75rem' }}>📚 All Project Setup Lessons</div>
+          <div style={{ display:'flex', flexDirection:'column', gap:'2px' }}>
+            {allLessons.slice(0, 8).map(l => (
+              <Link key={l.id} href={`/software/revit/project-setup/${l.id}`} style={{ fontSize:'12px', padding:'5px 8px', borderRadius:'6px', textDecoration:'none', color:l.id===lesson.id?'#34d399':'#8892a4', background:l.id===lesson.id?'rgba(16,185,129,0.08)':'transparent', display:'flex', alignItems:'center', gap:'6px' }}>
+                <span style={{ fontSize:'10px', fontWeight:700, color:l.id===lesson.id?'#10b981':'#4a5568', width:'20px', flexShrink:0 }}>{String(l.num).padStart(2,'0')}</span>
+                <span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{l.title.split(':')[0].split('?')[0].trim()}</span>
+              </Link>
+            ))}
+            {allLessons.length > 8 && (
+              <Link href="/software/revit/project-setup" style={{ fontSize:'12px', color:'#10b981', padding:'5px 8px', textDecoration:'none' }}>
+                + {allLessons.length - 8} more lessons →
+              </Link>
+            )}
+          </div>
+        </div>
+
+      </div>
+      </div>
+    </div>
   );
 }
