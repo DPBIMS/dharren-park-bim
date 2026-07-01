@@ -216,7 +216,8 @@ const NAV_ITEMS = [
             icon: 'circle',
             label: 'Dynamo',
             sub: 'Visual scripting for Revit',
-            href: '/automation/dynamo',
+            href: '/automation/dynamo/getting-started',
+            status: 'live',
           },
           {
             icon: 'grid',
@@ -437,9 +438,10 @@ function Dropdown({ item, onClose }) {
           const isStandards  = col.heading === 'STANDARDS';
           const isCDE        = col.heading === 'CDE WORKFLOW';
           const isFoundation = col.heading === 'FOUNDATION';
-          const isHighlight  = isRevit || isFamily || isNavisworks || isCloud || isStandards || isCDE || isFoundation;
-          const accentColor = isRevit ? '#2563eb' : isFamily ? '#f59e0b' : isNavisworks ? '#10b981' : isCloud ? '#8b5cf6' : isStandards ? '#06b6d4' : isCDE ? '#6366f1' : '#ec4899';
-          const accentText  = isRevit ? '#60a5fa'  : isFamily ? '#f59e0b' : isNavisworks ? '#34d399' : isCloud ? '#a78bfa' : isStandards ? '#22d3ee' : isCDE ? '#818cf8' : '#f472b6';
+          const isAutomation = col.heading === 'AUTOMATION';
+          const isHighlight  = isRevit || isFamily || isNavisworks || isCloud || isStandards || isCDE || isFoundation || isAutomation;
+          const accentColor = isRevit ? '#2563eb' : isFamily ? '#f59e0b' : isNavisworks ? '#10b981' : isCloud ? '#8b5cf6' : isStandards ? '#06b6d4' : isCDE ? '#6366f1' : isAutomation ? '#14b8a6' : '#ec4899';
+          const accentText  = isRevit ? '#60a5fa'  : isFamily ? '#f59e0b' : isNavisworks ? '#34d399' : isCloud ? '#a78bfa' : isStandards ? '#22d3ee' : isCDE ? '#818cf8' : isAutomation ? '#2dd4bf' : '#f472b6';
 
           return (
             <div key={ci} style={{
@@ -476,6 +478,13 @@ function Dropdown({ item, onClose }) {
                         <path d="M1.5 4.6l2 2 4-4.2" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.95"/>
                       ) : isCDE ? (
                         <circle cx="4.5" cy="4.5" r="3.2" fill="none" stroke="white" strokeWidth="1.3" opacity="0.9"/>
+                      ) : isAutomation ? (
+                        <>
+                          <circle cx="2" cy="2.2" r="1.2" fill="white" opacity="0.9"/>
+                          <circle cx="7" cy="2.2" r="1.2" fill="white" opacity="0.9"/>
+                          <circle cx="4.5" cy="6.8" r="1.2" fill="white" opacity="0.9"/>
+                          <path d="M2.9 3L4 5.8M6.1 3L5 5.8" stroke="white" strokeWidth="0.8" opacity="0.7"/>
+                        </>
                       ) : (
                         <path d="M4.5 1L5.7 3.6 8.5 4 6.5 6 7 8.7 4.5 7.4 2 8.7 2.5 6 0.5 4 3.3 3.6z" fill="white" opacity="0.9"/>
                       )}
