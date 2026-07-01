@@ -93,14 +93,14 @@ export default function RegisterPage() {
           {error && <div style={{ background:'rgba(248,113,113,0.1)', border:'1px solid rgba(248,113,113,0.2)', borderRadius:'8px', padding:'10px 14px', fontSize:'13px', color:'#f87171', marginBottom:'1rem' }}>⚠ {error}</div>}
 
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'.75rem', marginBottom:'1rem' }}>
-            <div><label style={lbl}>FIRST NAME *</label><input placeholder="Juan" value={form.firstName} onChange={e => set('firstName', e.target.value)} style={inp} /></div>
-            <div><label style={lbl}>LAST NAME</label><input placeholder="Dela Cruz" value={form.lastName} onChange={e => set('lastName', e.target.value)} style={inp} /></div>
+            <div><label style={lbl}>FIRST NAME *</label><input name="firstName" autoComplete="given-name" placeholder="Juan" value={form.firstName} onChange={e => set('firstName', e.target.value)} style={inp} /></div>
+            <div><label style={lbl}>LAST NAME</label><input name="lastName" autoComplete="family-name" placeholder="Dela Cruz" value={form.lastName} onChange={e => set('lastName', e.target.value)} style={inp} /></div>
           </div>
 
-          {[['EMAIL ADDRESS *','email','you@email.com','email'],['PHONE NUMBER','phone','+63 9XX XXX XXXX','tel']].map(([label,key,ph,type]) => (
+          {[['EMAIL ADDRESS *','email','you@email.com','email','email'],['PHONE NUMBER','phone','+63 9XX XXX XXXX','tel','tel']].map(([label,key,ph,type,autoComplete]) => (
             <div key={key} style={{ marginBottom:'1rem' }}>
               <label style={lbl}>{label}</label>
-              <input type={type} placeholder={ph} value={form[key]} onChange={e => set(key, e.target.value)} style={inp} />
+              <input type={type} name={key} autoComplete={autoComplete} placeholder={ph} value={form[key]} onChange={e => set(key, e.target.value)} style={inp} />
             </div>
           ))}
 
@@ -133,7 +133,7 @@ export default function RegisterPage() {
           <div style={{ marginBottom:'1rem' }}>
             <label style={lbl}>PASSWORD *</label>
             <div style={{ position:'relative' }}>
-              <input type={showPass ? 'text' : 'password'} placeholder="Min. 8 characters" value={form.password} onChange={e => { set('password', e.target.value); checkStrength(e.target.value); }} style={{ ...inp, paddingRight:'40px' }} />
+              <input type={showPass ? 'text' : 'password'} name="password" autoComplete="new-password" placeholder="Min. 8 characters" value={form.password} onChange={e => { set('password', e.target.value); checkStrength(e.target.value); }} style={{ ...inp, paddingRight:'40px' }} />
               <button onClick={() => setShowPass(!showPass)} style={{ position:'absolute', right:'12px', top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', fontSize:'16px' }}>{showPass ? '🙈' : '👁'}</button>
             </div>
             <div style={{ height:'3px', borderRadius:'2px', background:'rgba(255,255,255,0.08)', marginTop:'6px', overflow:'hidden' }}>
@@ -145,7 +145,7 @@ export default function RegisterPage() {
           <div style={{ marginBottom:'1rem' }}>
             <label style={lbl}>CONFIRM PASSWORD *</label>
             <div style={{ position:'relative' }}>
-              <input type={showConfirm ? 'text' : 'password'} placeholder="Repeat your password" value={form.confirm} onChange={e => set('confirm', e.target.value)} style={{ ...inp, paddingRight:'40px' }} />
+              <input type={showConfirm ? 'text' : 'password'} name="confirmPassword" autoComplete="new-password" placeholder="Repeat your password" value={form.confirm} onChange={e => set('confirm', e.target.value)} style={{ ...inp, paddingRight:'40px' }} />
               <button onClick={() => setShowConfirm(!showConfirm)} style={{ position:'absolute', right:'12px', top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', fontSize:'16px' }}>{showConfirm ? '🙈' : '👁'}</button>
             </div>
             {form.confirm && form.password !== form.confirm && <div style={{ fontSize:'12px', color:'#f87171', marginTop:'4px' }}>⚠ Passwords do not match</div>}

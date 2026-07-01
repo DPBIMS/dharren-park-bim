@@ -951,10 +951,30 @@ const passedCount  = takenQuizzes.filter(q => q.passed).length;
             <div className="profile-grid">
               <div className="profile-card">
                 <div className="profile-card-title">Personal Information</div>
-                <div className="form-group"><label>FIRST NAME</label><input defaultValue={profile?.first_name} /></div>
-                <div className="form-group"><label>LAST NAME</label><input defaultValue={profile?.last_name} /></div>
-                <div className="form-group"><label>PHONE</label><input defaultValue={profile?.phone} /></div>
-                <div className="form-group"><label>PROFESSION</label><input defaultValue={profile?.profession} /></div>
+                <div className="form-group"><label>FIRST NAME</label><input name="firstName" autoComplete="given-name" defaultValue={profile?.first_name} /></div>
+                <div className="form-group"><label>LAST NAME</label><input name="lastName" autoComplete="family-name" defaultValue={profile?.last_name} /></div>
+                <div className="form-group"><label>EMAIL</label><input name="email" type="email" autoComplete="email" defaultValue={profile?.email} disabled /></div>
+                <div className="form-group"><label>PHONE</label><input name="phone" type="tel" autoComplete="tel" defaultValue={profile?.phone} /></div>
+                <div className="form-group">
+                  <label>COUNTRY</label>
+                  <select name="country" autoComplete="country" defaultValue={profile?.country}>
+                    {[['PH','Philippines'],['SG','Singapore'],['AE','UAE'],['AU','Australia'],['UK','United Kingdom'],['US','United States'],['other','Other']].map(([v,l]) => <option key={v} value={v}>{l}</option>)}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>PROFESSION</label>
+                  <select name="profession" defaultValue={profile?.profession}>
+                    <option value="">Select...</option>
+                    {['Architect','Engineer','Student','BIM Manager','Contractor','Drafter / CAD Technician','Other'].map(p => <option key={p}>{p}</option>)}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>HOW DID YOU FIND US?</label>
+                  <select name="howFound" defaultValue={profile?.how_found}>
+                    <option value="">Select...</option>
+                    {['Google Search','Facebook','Instagram','LinkedIn','Friend / Colleague','YouTube','Other'].map(o => <option key={o}>{o}</option>)}
+                  </select>
+                </div>
                 <button className="save-btn">Save Changes</button>
               </div>
               <div>

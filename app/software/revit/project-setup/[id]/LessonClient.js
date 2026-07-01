@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import AdminOnlyGate from '@/components/AdminOnlyGate';
 
 const PLAN_ACCESS = {
   free:    (l) => l.free,
@@ -79,15 +78,7 @@ function LessonContent({ content }) {
   );
 }
 
-export default function SetupLessonClient(props) {
-  return (
-    <AdminOnlyGate title="Revit Project Setup" backHref="/software/revit/project-setup" backLabel="← Back to Project Setup">
-      <SetupLessonClientInner {...props} />
-    </AdminOnlyGate>
-  );
-}
-
-function SetupLessonClientInner({ lesson, allLessons }) {
+export default function SetupLessonClient({ lesson, allLessons }) {
   const router = useRouter();
   const [activePlan,    setActivePlan]    = useState('free');
   const [isComplete,    setIsComplete]    = useState(false);
