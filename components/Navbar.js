@@ -184,6 +184,40 @@ const NAV_ITEMS = [
     ],
   },
   {
+    label: 'BIM Workflow',
+    tier: 'INTERMEDIATE',
+    badge: null,
+    description: 'The Common Data Environment — the pillar workflow behind every ISO 19650 project.',
+    columns: [
+      {
+        heading: 'PILLAR OF CDE WORKFLOW',
+        items: [
+          {
+            icon: 'grid',
+            label: 'CDE Foundations',
+            sub: 'States, containers & naming',
+            href: '/software/cde/getting-started',
+            status: 'live',
+          },
+          {
+            icon: 'refresh',
+            label: 'CDE Workflows',
+            sub: 'Coordination, federation & issue',
+            href: '/software/cde/getting-started',
+            status: 'live',
+          },
+          {
+            icon: 'settings',
+            label: 'Governance & Handover',
+            sub: 'Security, standards & COBie',
+            href: '/software/cde/getting-started',
+            status: 'live',
+          },
+        ],
+      },
+    ],
+  },
+  {
     label: 'Automation',
     tier: 'ADVANCED',
     badge: null,

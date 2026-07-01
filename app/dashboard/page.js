@@ -164,6 +164,42 @@ const formaLessons = [
   { id:'forma-24', num:'24', title:'Capstone — Dharren Park Site Analysis & Revit Handoff',              cat:'advanced',     topic:'Capstone',          free:false },
 ];
 
+// ── Common Data Environment Lessons (cde-1 to cde-32) ─────────────
+const cdeLessons = [
+  { id:'cde-1',  num:'01', title:'What is a CDE & Why It Exists in ISO 19650',                       cat:'beginner',     topic:'CDE Fundamentals',   free:true  },
+  { id:'cde-2',  num:'02', title:'The Four CDE States — WIP, Shared, Published & Archived',           cat:'beginner',     topic:'CDE States',         free:true  },
+  { id:'cde-3',  num:'03', title:'Information Containers — Files, Models & Documents as ISO 19650 Data Units', cat:'beginner', topic:'CDE Fundamentals', free:true  },
+  { id:'cde-4',  num:'04', title:'The ISO 19650 Naming Convention — Field by Field',                   cat:'beginner',     topic:'Naming & Metadata',  free:false },
+  { id:'cde-5',  num:'05', title:'Metadata & Attributes — The Data Behind Every File',                 cat:'beginner',     topic:'Naming & Metadata',  free:false },
+  { id:'cde-6',  num:'06', title:'Roles in the CDE — Who Does What & When',                            cat:'beginner',     topic:'Roles & Governance', free:false },
+  { id:'cde-7',  num:'07', title:'Suitability Codes — What S0 to S7 Actually Mean',                    cat:'beginner',     topic:'Suitability Codes',  free:false },
+  { id:'cde-8',  num:'08', title:'Setting Up the DPC2025 CDE on ACC — Project Configuration',           cat:'beginner',     topic:'ACC Configuration',  free:false },
+  { id:'cde-9',  num:'09', title:'The WIP State — Rules, Responsibilities & What Belongs Here',         cat:'intermediate', topic:'CDE States',         free:false },
+  { id:'cde-10', num:'10', title:'Moving from WIP to Shared — The Internal Review Process',             cat:'intermediate', topic:'CDE States',         free:false },
+  { id:'cde-11', num:'11', title:'The Shared State — What Coordination Actually Means in ISO 19650',    cat:'intermediate', topic:'CDE States',         free:false },
+  { id:'cde-12', num:'12', title:'Model Federation in the Shared State — Combining Discipline Models',  cat:'intermediate', topic:'Model Federation',   free:false },
+  { id:'cde-13', num:'13', title:'Moving from Shared to Published — Authorisation & Sign-Off',          cat:'intermediate', topic:'CDE States',         free:false },
+  { id:'cde-14', num:'14', title:'The Published State — Formal Issue & Suitability Assignment',        cat:'intermediate', topic:'CDE States',         free:false },
+  { id:'cde-15', num:'15', title:'The Archive State — Version History, Audit Trail & Compliance',      cat:'intermediate', topic:'CDE States',         free:false },
+  { id:'cde-16', num:'16', title:'Transmittals — The Formal Communication Layer of the CDE',            cat:'intermediate', topic:'Transmittals',       free:false },
+  { id:'cde-17', num:'17', title:'The Revision System — How Files Evolve Through the CDE',              cat:'intermediate', topic:'Revisions',          free:false },
+  { id:'cde-18', num:'18', title:'Drawing Issue Workflow — From Revit to Published Sheet in ACC',       cat:'intermediate', topic:'Drawing Workflow',   free:false },
+  { id:'cde-19', num:'19', title:'RFI & Issue Workflow Inside the CDE Process',                          cat:'intermediate', topic:'RFI & Issues',       free:false },
+  { id:'cde-20', num:'20', title:'Multi-Party CDEs — Managing Interfaces Between Appointed Parties',    cat:'intermediate', topic:'Multi-Party CDE',    free:false },
+  { id:'cde-21', num:'21', title:'The BIM Execution Plan & CDE — How They Connect',                     cat:'advanced',     topic:'BEP & Governance',   free:false },
+  { id:'cde-22', num:'22', title:'Federated Model Management in the CDE',                                cat:'advanced',     topic:'Model Federation',   free:false },
+  { id:'cde-23', num:'23', title:'Clash Detection Workflow Within the CDE Process',                     cat:'advanced',     topic:'Clash Detection',    free:false },
+  { id:'cde-24', num:'24', title:'CDE Across Project Stages — RIBA Plan of Work & ISO 19650 Phases',   cat:'advanced',     topic:'Project Stages',     free:false },
+  { id:'cde-25', num:'25', title:'Submittals & Approval Workflows in ACC',                                cat:'advanced',     topic:'Submittals & Approvals', free:false },
+  { id:'cde-26', num:'26', title:'COBie Data Delivery Through the CDE',                                  cat:'advanced',     topic:'COBie & Data',       free:false },
+  { id:'cde-27', num:'27', title:'As-Built Information — Managing Record Models in the CDE',            cat:'advanced',     topic:'As-Built & Handover',free:false },
+  { id:'cde-28', num:'28', title:'Common CDE Failures — What Goes Wrong & How to Prevent It',           cat:'advanced',     topic:'CDE Governance',     free:false },
+  { id:'cde-29', num:'29', title:'CDE Security — Access Control, Permissions & Data Protection',        cat:'advanced',     topic:'CDE Security',       free:false },
+  { id:'cde-30', num:'30', title:'Setting Up a CDE for a New Office — Standards & Configuration',       cat:'advanced',     topic:'Office Setup',       free:false },
+  { id:'cde-31', num:'31', title:'Onboarding a Project Team to the CDE — Training & Governance',        cat:'advanced',     topic:'Onboarding & Training', free:false },
+  { id:'cde-32', num:'32', title:'Capstone — DPC2025 CDE: Configure, Issue, Coordinate, RFI & COBie Handover', cat:'advanced', topic:'Capstone',        free:false },
+];
+
 // ── Course registry ────────────────────────────────────────────────
 const COURSES = [
   {
@@ -219,6 +255,15 @@ const COURSES = [
     lessons: accLessons,
     path: '/software/acc/getting-started',
     quizPath: (id) => `/software/acc/getting-started/${id}/quiz`,
+  },
+  {
+    id: 'cde',
+    label: 'Common Data Environment',
+    icon: '🗂',
+    color: '#0ea5e9',
+    lessons: cdeLessons,
+    path: '/software/cde/getting-started',
+    quizPath: (id) => `/software/cde/getting-started/${id}/quiz`,
   },
 ];
 
