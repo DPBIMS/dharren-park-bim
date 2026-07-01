@@ -21,25 +21,26 @@ const NAV_ITEMS = [
             icon: 'circle',
             label: 'BIM basics',
             sub: 'What is BIM & why it matters',
-            href: '/foundation/bim-basics',
+            href: '/learn/bim-basics',
+            status: 'live',
           },
           {
             icon: 'grid',
             label: 'BIM dimensions',
             sub: '3D through 8D explained',
-            href: '/foundation/bim-dimensions',
+            href: '/learn/bim-dimensions',
           },
           {
             icon: 'list',
             label: 'LOD overview',
             sub: 'Levels of development',
-            href: '/foundation/lod-overview',
+            href: '/learn/lod-overview',
           },
           {
             icon: 'user',
             label: 'BIM roles',
             sub: 'Who does what on a BIM project',
-            href: '/foundation/bim-roles',
+            href: '/learn/bim-roles',
           },
         ],
       },
@@ -162,10 +163,9 @@ const NAV_ITEMS = [
           {
             icon: 'plus',
             label: 'ISO 19650',
-            sub: 'Parts 1-6 series',
+            sub: 'Standards Course',
             href: '/standards/iso-19650',
-            badge: 'Updated',
-            badgeColor: 'green',
+            status: 'live',
           },
           {
             icon: 'refresh',
@@ -190,26 +190,12 @@ const NAV_ITEMS = [
     description: 'The Common Data Environment — the pillar workflow behind every ISO 19650 project.',
     columns: [
       {
-        heading: 'PILLAR OF CDE WORKFLOW',
+        heading: 'CDE WORKFLOW',
         items: [
           {
             icon: 'grid',
-            label: 'CDE Foundations',
-            sub: 'States, containers & naming',
-            href: '/software/cde/getting-started',
-            status: 'live',
-          },
-          {
-            icon: 'refresh',
-            label: 'CDE Workflows',
-            sub: 'Coordination, federation & issue',
-            href: '/software/cde/getting-started',
-            status: 'live',
-          },
-          {
-            icon: 'settings',
-            label: 'Governance & Handover',
-            sub: 'Security, standards & COBie',
+            label: 'CDE Foundations & Workflow',
+            sub: 'States, coordination & governance',
             href: '/software/cde/getting-started',
             status: 'live',
           },
@@ -444,11 +430,16 @@ function Dropdown({ item, onClose }) {
         gap: 0,
       }}>
         {item.columns.map((col, ci) => {
-          const isRevit  = col.heading === 'REVIT';
-          const isFamily = col.heading === 'REVIT FAMILIES';
-          const isHighlight = isRevit || isFamily;
-          const accentColor = isRevit ? '#2563eb' : '#f59e0b';
-          const accentText  = isRevit ? '#60a5fa'  : '#f59e0b';
+          const isRevit      = col.heading === 'REVIT';
+          const isFamily     = col.heading === 'REVIT FAMILIES';
+          const isNavisworks = col.heading === 'NAVISWORKS';
+          const isCloud      = col.heading === 'AUTODESK CLOUD';
+          const isStandards  = col.heading === 'STANDARDS';
+          const isCDE        = col.heading === 'CDE WORKFLOW';
+          const isFoundation = col.heading === 'FOUNDATION';
+          const isHighlight  = isRevit || isFamily || isNavisworks || isCloud || isStandards || isCDE || isFoundation;
+          const accentColor = isRevit ? '#2563eb' : isFamily ? '#f59e0b' : isNavisworks ? '#10b981' : isCloud ? '#8b5cf6' : isStandards ? '#06b6d4' : isCDE ? '#6366f1' : '#ec4899';
+          const accentText  = isRevit ? '#60a5fa'  : isFamily ? '#f59e0b' : isNavisworks ? '#34d399' : isCloud ? '#a78bfa' : isStandards ? '#22d3ee' : isCDE ? '#818cf8' : '#f472b6';
 
           return (
             <div key={ci} style={{
@@ -472,8 +463,21 @@ function Dropdown({ item, onClose }) {
                           <rect x="1" y="5" width="3" height="3" rx="0.5" fill="white" opacity="0.6"/>
                           <rect x="5" y="5" width="3" height="3" rx="0.5" fill="#f59e0b"/>
                         </>
-                      ) : (
+                      ) : isFamily ? (
                         <polygon points="4.5,1 8,4.5 4.5,8 1,4.5" fill="white" opacity="0.9"/>
+                      ) : isNavisworks ? (
+                        <>
+                          <circle cx="3.2" cy="4.5" r="2.4" fill="white" opacity="0.65"/>
+                          <circle cx="5.8" cy="4.5" r="2.4" fill="white" opacity="0.9"/>
+                        </>
+                      ) : isCloud ? (
+                        <path d="M2.6 6.8a1.7 1.7 0 01-.2-3.39 2 2 0 013.86-.9 1.55 1.55 0 011.94 1.5 1.55 1.55 0 01-1.55 1.55 1.7 1.7 0 01-.25 1.24z" fill="white" opacity="0.9"/>
+                      ) : isStandards ? (
+                        <path d="M1.5 4.6l2 2 4-4.2" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.95"/>
+                      ) : isCDE ? (
+                        <circle cx="4.5" cy="4.5" r="3.2" fill="none" stroke="white" strokeWidth="1.3" opacity="0.9"/>
+                      ) : (
+                        <path d="M4.5 1L5.7 3.6 8.5 4 6.5 6 7 8.7 4.5 7.4 2 8.7 2.5 6 0.5 4 3.3 3.6z" fill="white" opacity="0.9"/>
                       )}
                     </svg>
                   </div>

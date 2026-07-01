@@ -4,10 +4,10 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
 const plans = [
-  { name: 'basic',   label: 'Basic',   desc: 'For beginners starting their BIM journey.',     monthly: 299,  annual: 239,  features: ['Full access to BIM articles','Core lessons & topics','Beginner learning path'],                                          unavail: ['Downloadable PDFs','Quizzes & assessments','Video lessons'],       featured: false },
-  { name: 'pro',     label: 'Pro',     desc: 'For students serious about BIM careers.',        monthly: 599,  annual: 479,  features: ['Everything in Basic','Downloadable PDFs','Quizzes & assessments','Intermediate lessons'],                               unavail: ['Video lessons','3D model resources'],                               featured: true  },
-  { name: 'premium', label: 'Premium', desc: 'Full access to everything, now and future.',     monthly: 999,  annual: 799,  features: ['Everything in Pro','Video lessons (coming soon)','3D model resources','Priority support','Early access','Certificate'], unavail: [],                                                                  featured: false },
-  { name: 'master',  label: 'Master',  desc: 'For studios & teams managing BIM at scale.',     monthly: 1999, annual: 1599, features: ['Everything in Premium','Revit Matrix portfolio dashboard','Company-level compliance audits','Multi-project standards tracking'], unavail: [],                                                          featured: false },
+  { name: 'basic',   label: 'Basic',   desc: 'For beginners starting their BIM journey.',     monthly: 599,  annual: 479,  features: ['Full access to BIM articles','Core lessons & topics','Beginner learning path'],                                          unavail: ['Downloadable PDFs','Quizzes & assessments','Video lessons'],       featured: false },
+  { name: 'pro',     label: 'Pro',     desc: 'For students serious about BIM careers.',        monthly: 1299, annual: 1039, features: ['Everything in Basic','Downloadable PDFs','Quizzes & assessments','Intermediate lessons'],                               unavail: ['Video lessons','3D model resources'],                               featured: true  },
+  { name: 'premium', label: 'Premium', desc: 'Full access to everything, now and future.',     monthly: 1999, annual: 1599, features: ['Everything in Pro','Video lessons (coming soon)','3D model resources','Priority support','Early access','Certificate'], unavail: [],                                                                  featured: false },
+  { name: 'master',  label: 'Master',  desc: 'For studios & teams managing BIM at scale.',     monthly: 3999, annual: 3199, features: ['Everything in Premium','Revit Matrix portfolio dashboard','Company-level compliance audits','Multi-project standards tracking'], unavail: [],                                                          featured: false },
 ];
 
 const methods = [

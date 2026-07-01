@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import LessonClient from './LessonClient';
 import lessons from '@/lib/lessonsData';
@@ -10,5 +11,9 @@ export default async function LessonPage({ params }) {
   const resolvedParams = await params;
   const lesson = lessons.find(l => l.id === Number(resolvedParams.id));
   if (!lesson) notFound();
-  return <LessonClient lesson={lesson} allLessons={lessons} />;
+  return (
+    <Suspense fallback={null}>
+      <LessonClient lesson={lesson} allLessons={lessons} />
+    </Suspense>
+  );
 }

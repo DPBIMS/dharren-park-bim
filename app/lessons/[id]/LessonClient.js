@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import styles from './lesson.module.css';
@@ -32,8 +32,17 @@ const PLAN_ACCESS = {
   premium: ()       => true,
 };
 
+// Entry points that link into a lesson with ?from=<key> get their own
+// "back" destination instead of always returning to the general library.
+const LIBRARY_ORIGINS = {
+  'bim-basics': { href: '/learn/bim-basics', label: '← Back to BIM Basics' },
+};
+
 export default function LessonClient({ lesson, allLessons }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const origin = LIBRARY_ORIGINS[searchParams.get('from')] || { href: '/lessons', label: '← Back to Lessons' };
+  const fromQuery = searchParams.get('from') ? `?from=${searchParams.get('from')}` : '';
   const [completed,     setCompleted]     = useState(false);
   const [activeSection, setActiveSection] = useState(lesson.sections?.[0]?.id || '');
   const [activePlan,    setActivePlan]    = useState('free');
@@ -103,11 +112,11 @@ export default function LessonClient({ lesson, allLessons }) {
   const nextIsLocked = planLoaded && nextLesson && !canAccess(nextLesson);
 
   return (
-    <div style={{ paddingTop: '64px' }}>
+    <div>
       {/* TOP BAR */}
       <div className={styles.topbar}>
         <div className={styles.topbarLeft}>
-          <Link href="/lessons" className={styles.backBtn}>← Back to Lessons</Link>
+          <Link href={origin.href} className={styles.backBtn}>{origin.label}</Link>
           <div className={styles.topbarDivider} />
           <div className={styles.topbarLesson}>
             Lesson <strong>{lesson.num}</strong> of {allLessons.length}
@@ -225,7 +234,7 @@ export default function LessonClient({ lesson, allLessons }) {
             <div className={styles.lessonNav}>
               {/* Previous */}
               {lesson.prev ? (
-                <Link href={`/lessons/${lesson.prev.id}`} className={styles.navCard}>
+                <Link href={`/lessons/${lesson.prev.id}${fromQuery}`} className={styles.navCard}>
                   <div className={styles.navDirection}>← Previous</div>
                   <div className={styles.navLessonTitle}>{lesson.prev.title}</div>
                 </Link>
@@ -247,7 +256,7 @@ export default function LessonClient({ lesson, allLessons }) {
                     <div style={{ fontSize:'11px', color:'#f59e0b', marginTop:'4px', fontWeight:500 }}>View Plans →</div>
                   </Link>
                 ) : (
-                  <Link href={`/lessons/${lesson.next.id}`} className={`${styles.navCard} ${styles.navCardNext}`}>
+                  <Link href={`/lessons/${lesson.next.id}${fromQuery}`} className={`${styles.navCard} ${styles.navCardNext}`}>
                     <div className={styles.navDirection}>Next →</div>
                     <div className={styles.navLessonTitle}>{lesson.next.title}</div>
                   </Link>
@@ -289,7 +298,7 @@ export default function LessonClient({ lesson, allLessons }) {
             <div className={styles.sidebarTitle}>📚 Related Lessons</div>
             <div className={styles.relatedList}>
               {allLessons.slice(0, 5).map(l => (
-                <Link key={l.id} href={`/lessons/${l.id}`} className={styles.relatedItem}>
+                <Link key={l.id} href={`/lessons/${l.id}${fromQuery}`} className={styles.relatedItem}>
                   <span className={styles.relatedNum}>{l.num}</span>
                   <span className={`${styles.relatedDot} ${l.id === lesson.id ? styles.dotCurrent : styles.dotNext}`} />
                   <span>{l.title.split(':')[0]}</span>
@@ -298,17 +307,6 @@ export default function LessonClient({ lesson, allLessons }) {
             </div>
           </div>
 
-          {lesson.resource && (
-            <div className={`${styles.sidebarCard} ${styles.resourceSidebar}`}>
-              <div className={styles.sidebarTitle}>📄 Lesson Resource</div>
-              <p className={styles.resourceDesc}>
-                Download the {lesson.resource.label} for this lesson.
-              </p>
-              <button className={styles.downloadBtn}>
-                Download {lesson.resource.type} ↓
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </div>
