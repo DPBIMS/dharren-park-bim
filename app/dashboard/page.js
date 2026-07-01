@@ -108,6 +108,62 @@ const setupLessons = [
   { id:'ps-24', num:'24', title:'Project Setup Checklist & Handoff',                 cat:'advanced',     topic:'Capstone',         free:false },
 ];
 
+// ── ACC Getting Started Lessons (acc-1 to acc-24) ────────────────
+const accLessons = [
+  { id:'acc-1',  num:'01', title:'What is Autodesk Construction Cloud? History, Modules & the BIM 360 Migration',  cat:'beginner',     topic:'ACC Basics',             free:true  },
+  { id:'acc-2',  num:'02', title:'Setting Up Your ACC Hub: Account, Hub & Project Configuration',                   cat:'beginner',     topic:'ACC Basics',             free:true  },
+  { id:'acc-3',  num:'03', title:'Navigating the ACC Interface: Modules, Dashboards & Admin Panel',                 cat:'beginner',     topic:'ACC Basics',             free:true  },
+  { id:'acc-4',  num:'04', title:'ACC Docs Fundamentals: Uploading, Organizing & Version Control',                  cat:'beginner',     topic:'Document Management',    free:false },
+  { id:'acc-5',  num:'05', title:'Versioning & Revisions: The Difference and When to Use Each',                     cat:'beginner',     topic:'Document Management',    free:false },
+  { id:'acc-6',  num:'06', title:'CDE Folder Structure, Permissions & Document States',                             cat:'beginner',     topic:'Document Management',    free:false },
+  { id:'acc-7',  num:'07', title:'Transmittals: Issuing Documents with Formal Audit Trails',                        cat:'beginner',     topic:'Document Management',    free:false },
+  { id:'acc-8',  num:'08', title:'Members, Companies & Permission Sets in ACC',                                      cat:'beginner',     topic:'Document Management',    free:false },
+  { id:'acc-9',  num:'09', title:'Setting Up Coordination Spaces in ACC Coordinate',                                 cat:'intermediate', topic:'Model Coordination',     free:false },
+  { id:'acc-10', num:'10', title:'Cloud Clash Detection: Running Tests & Understanding Clash Types',                 cat:'intermediate', topic:'Model Coordination',     free:false },
+  { id:'acc-11', num:'11', title:'Clash Review, Assignment & Resolution Workflow',                                   cat:'intermediate', topic:'Model Coordination',     free:false },
+  { id:'acc-12', num:'12', title:'ACC Build Issues: Creating, Assigning & Closing Issues in the Field',             cat:'intermediate', topic:'Issues & RFIs',          free:false },
+  { id:'acc-13', num:'13', title:'RFI Workflow: Ball-in-Court Process & Status Tracking',                           cat:'intermediate', topic:'Issues & RFIs',          free:false },
+  { id:'acc-14', num:'14', title:'Submittals, Meetings & Daily Logs in ACC Build',                                  cat:'intermediate', topic:'Construction Management', free:false },
+  { id:'acc-15', num:'15', title:'ACC Cost Management: Budgets, Contracts & Change Orders',                         cat:'intermediate', topic:'Cost Management',        free:false },
+  { id:'acc-16', num:'16', title:'ACC Schedule: 4D Linking & Progress Tracking',                                    cat:'intermediate', topic:'Schedule',               free:false },
+  { id:'acc-17', num:'17', title:'Sheets & Drawings: Publishing from Revit & Managing Drawing Sets',                cat:'advanced',     topic:'Sheets & Drawings',      free:false },
+  { id:'acc-18', num:'18', title:'Quality & Safety: Forms, Checklists & Inspection Workflows',                      cat:'advanced',     topic:'Quality & Safety',       free:false },
+  { id:'acc-19', num:'19', title:'Asset Management: Tracking Equipment & COBie Data in ACC',                        cat:'advanced',     topic:'Asset Management',       free:false },
+  { id:'acc-20', num:'20', title:'Reporting & Insights: Building Project-Level Dashboards',                         cat:'advanced',     topic:'Reporting',              free:false },
+  { id:'acc-21', num:'21', title:'ISO 19650 in ACC: CDE Workflows, Suitability Codes & Compliance',                cat:'advanced',     topic:'Standards',              free:false },
+  { id:'acc-22', num:'22', title:'Project Handover: As-Built Package, COBie Export & O&M Deliverables',            cat:'advanced',     topic:'Handover',               free:false },
+  { id:'acc-23', num:'23', title:'BIM 360 to ACC Migration: Planning & Executing a Data Transfer',                  cat:'advanced',     topic:'Migration',              free:false },
+  { id:'acc-24', num:'24', title:'Capstone: End-to-End ACC Workflow for Dharren Park Tower',                        cat:'advanced',     topic:'Capstone',               free:false },
+];
+
+// ── Autodesk Forma Lessons (forma-1 to forma-24) ──────────────────
+const formaLessons = [
+  { id:'forma-1',  num:'01', title:'What is Autodesk Forma & Where it Fits in the BIM Workflow',        cat:'beginner',     topic:'Forma Basics',      free:true  },
+  { id:'forma-2',  num:'02', title:'Setting Up Your Forma Account & Workspace',                          cat:'beginner',     topic:'Forma Basics',      free:true  },
+  { id:'forma-3',  num:'03', title:'Creating Your First Project & Importing Site Context',               cat:'beginner',     topic:'Forma Basics',      free:true  },
+  { id:'forma-4',  num:'04', title:'Understanding the Forma Interface & Navigation',                     cat:'beginner',     topic:'Forma Basics',      free:false },
+  { id:'forma-5',  num:'05', title:'Building a Basic Massing Model',                                     cat:'beginner',     topic:'Massing',           free:false },
+  { id:'forma-6',  num:'06', title:'Using Proposals — Managing Design Alternatives',                     cat:'beginner',     topic:'Massing',           free:false },
+  { id:'forma-7',  num:'07', title:'Terrain, Site Boundaries & Context Buildings',                       cat:'beginner',     topic:'Massing',           free:false },
+  { id:'forma-8',  num:'08', title:'Parametric Massing — Generating Buildings from Rules',               cat:'beginner',     topic:'Massing',           free:false },
+  { id:'forma-9',  num:'09', title:'Solar Analysis — Sun Hours & Shadow Studies',                        cat:'intermediate', topic:'Solar Analysis',    free:false },
+  { id:'forma-10', num:'10', title:'Wind Analysis — Pedestrian Comfort & Microclimate',                  cat:'intermediate', topic:'Wind Analysis',     free:false },
+  { id:'forma-11', num:'11', title:'Noise Analysis — Understanding Urban Sound Exposure',                cat:'intermediate', topic:'Noise Analysis',    free:false },
+  { id:'forma-12', num:'12', title:'Daylight Potential Analysis',                                         cat:'intermediate', topic:'Daylight',          free:false },
+  { id:'forma-13', num:'13', title:'Green Area Ratio & Vegetation Planning',                              cat:'intermediate', topic:'Vegetation',        free:false },
+  { id:'forma-14', num:'14', title:'View Analysis — What Can Occupants See?',                             cat:'intermediate', topic:'View Analysis',     free:false },
+  { id:'forma-15', num:'15', title:'Reading Analysis Results — What the Numbers Mean',                   cat:'intermediate', topic:'Analysis',          free:false },
+  { id:'forma-16', num:'16', title:'Presenting Analysis to Clients & Design Teams',                      cat:'intermediate', topic:'Analysis',          free:false },
+  { id:'forma-17', num:'17', title:'Connecting Forma to Revit — The Forma Plugin',                       cat:'advanced',     topic:'Revit Integration', free:false },
+  { id:'forma-18', num:'18', title:'Importing Forma Geometry into a Revit Project',                      cat:'advanced',     topic:'Revit Integration', free:false },
+  { id:'forma-19', num:'19', title:'Pushing Revit Design Updates Back to Forma',                         cat:'advanced',     topic:'Revit Integration', free:false },
+  { id:'forma-20', num:'20', title:'Area & Gross Floor Area Calculations in Forma',                      cat:'advanced',     topic:'Revit Integration', free:false },
+  { id:'forma-21', num:'21', title:'Open BIM Export — IFC, Speckle & ISO 19650 Data',                   cat:'advanced',     topic:'Open BIM',          free:false },
+  { id:'forma-22', num:'22', title:'Using Forma for Early-Stage Design Documentation',                   cat:'advanced',     topic:'Documentation',     free:false },
+  { id:'forma-23', num:'23', title:'Forma in the Project Programme — When to Use It',                    cat:'advanced',     topic:'Documentation',     free:false },
+  { id:'forma-24', num:'24', title:'Capstone — Dharren Park Site Analysis & Revit Handoff',              cat:'advanced',     topic:'Capstone',          free:false },
+];
+
 // ── Course registry ────────────────────────────────────────────────
 const COURSES = [
   {
@@ -145,6 +201,24 @@ const COURSES = [
     lessons: navisworksLessons,
     path: '/software/navisworks/getting-started',
     quizPath: (id) => `/software/navisworks/getting-started/${id}/quiz`,
+  },
+  {
+    id: 'forma',
+    label: 'Autodesk Forma',
+    icon: '☁',
+    color: '#3b82f6',
+    lessons: formaLessons,
+    path: '/software/forma/getting-started',
+    quizPath: (id) => `/software/forma/getting-started/${id}/quiz`,
+  },
+  {
+    id: 'acc',
+    label: 'Autodesk Construction Cloud',
+    icon: '⬡',
+    color: '#2563eb',
+    lessons: accLessons,
+    path: '/software/acc/getting-started',
+    quizPath: (id) => `/software/acc/getting-started/${id}/quiz`,
   },
 ];
 
@@ -282,7 +356,7 @@ export default function DashboardPage() {
   const bimCompleted  = bimLessons.filter(l => completed.has(String(l.id))).length;
 
   // Total across all courses
-  const allLessons     = [...bimLessons, ...revitLessons, ...setupLessons, ...navisworksLessons];
+  const allLessons     = [...bimLessons, ...revitLessons, ...setupLessons, ...navisworksLessons, ...formaLessons];
   const totalUnlocked  = allLessons.filter(l => canAccessLesson(l)).length;
   const totalCompleted = allLessons.filter(l => completed.has(String(l.id))).length;
 
