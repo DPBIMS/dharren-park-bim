@@ -210,21 +210,38 @@ const NAV_ITEMS = [
     description: 'Dynamo, pyRevit and API scripting for power users.',
     columns: [
       {
-        heading: 'AUTOMATION',
+        heading: 'DYNAMO',
         items: [
           {
             icon: 'circle',
             label: 'Dynamo',
-            sub: 'Visual scripting for Revit',
+            sub: 'Getting started — visual scripting basics',
             href: '/automation/dynamo/getting-started',
             status: 'live',
           },
+          {
+            icon: 'zap',
+            label: 'Dynamo Practice',
+            sub: 'Hands-on scripts & real workflows',
+            href: '/automation/dynamo/practice',
+            status: 'live',
+          },
+        ],
+      },
+      {
+        heading: 'PYREVIT',
+        items: [
           {
             icon: 'grid',
             label: 'pyRevit',
             sub: 'Python-powered Revit tools',
             href: '/automation/pyrevit',
           },
+        ],
+      },
+      {
+        heading: 'REVIT API & PLUG-INS',
+        items: [
           {
             icon: 'code',
             label: 'Revit API',
@@ -438,10 +455,12 @@ function Dropdown({ item, onClose }) {
           const isStandards  = col.heading === 'STANDARDS';
           const isCDE        = col.heading === 'CDE WORKFLOW';
           const isFoundation = col.heading === 'FOUNDATION';
-          const isAutomation = col.heading === 'AUTOMATION';
-          const isHighlight  = isRevit || isFamily || isNavisworks || isCloud || isStandards || isCDE || isFoundation || isAutomation;
-          const accentColor = isRevit ? '#2563eb' : isFamily ? '#f59e0b' : isNavisworks ? '#10b981' : isCloud ? '#8b5cf6' : isStandards ? '#06b6d4' : isCDE ? '#6366f1' : isAutomation ? '#14b8a6' : '#ec4899';
-          const accentText  = isRevit ? '#60a5fa'  : isFamily ? '#f59e0b' : isNavisworks ? '#34d399' : isCloud ? '#a78bfa' : isStandards ? '#22d3ee' : isCDE ? '#818cf8' : isAutomation ? '#2dd4bf' : '#f472b6';
+          const isDynamo     = col.heading === 'DYNAMO';
+          const isPyrevit    = col.heading === 'PYREVIT';
+          const isApiPlugins = col.heading === 'REVIT API & PLUG-INS';
+          const isHighlight  = isRevit || isFamily || isNavisworks || isCloud || isStandards || isCDE || isFoundation || isDynamo || isPyrevit || isApiPlugins;
+          const accentColor = isRevit ? '#2563eb' : isFamily ? '#f59e0b' : isNavisworks ? '#10b981' : isCloud ? '#8b5cf6' : isStandards ? '#06b6d4' : isCDE ? '#6366f1' : isDynamo ? '#14b8a6' : isPyrevit ? '#eab308' : isApiPlugins ? '#64748b' : '#ec4899';
+          const accentText  = isRevit ? '#60a5fa'  : isFamily ? '#f59e0b' : isNavisworks ? '#34d399' : isCloud ? '#a78bfa' : isStandards ? '#22d3ee' : isCDE ? '#818cf8' : isDynamo ? '#2dd4bf' : isPyrevit ? '#facc15' : isApiPlugins ? '#94a3b8' : '#f472b6';
 
           return (
             <div key={ci} style={{
@@ -478,12 +497,20 @@ function Dropdown({ item, onClose }) {
                         <path d="M1.5 4.6l2 2 4-4.2" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.95"/>
                       ) : isCDE ? (
                         <circle cx="4.5" cy="4.5" r="3.2" fill="none" stroke="white" strokeWidth="1.3" opacity="0.9"/>
-                      ) : isAutomation ? (
+                      ) : isDynamo ? (
                         <>
                           <circle cx="2" cy="2.2" r="1.2" fill="white" opacity="0.9"/>
                           <circle cx="7" cy="2.2" r="1.2" fill="white" opacity="0.9"/>
                           <circle cx="4.5" cy="6.8" r="1.2" fill="white" opacity="0.9"/>
                           <path d="M2.9 3L4 5.8M6.1 3L5 5.8" stroke="white" strokeWidth="0.8" opacity="0.7"/>
+                        </>
+                      ) : isPyrevit ? (
+                        <polygon points="4.5,1 7.5,2.75 7.5,6.25 4.5,8 1.5,6.25 1.5,2.75" fill="white" opacity="0.9"/>
+                      ) : isApiPlugins ? (
+                        <>
+                          <polyline points="2.6,3.2 0.6,4.5 2.6,5.8" stroke="white" strokeWidth="1" fill="none" opacity="0.9"/>
+                          <polyline points="6.4,3.2 8.4,4.5 6.4,5.8" stroke="white" strokeWidth="1" fill="none" opacity="0.9"/>
+                          <line x1="5.1" y1="1.9" x2="3.9" y2="7.1" stroke="white" strokeWidth="1" opacity="0.9"/>
                         </>
                       ) : (
                         <path d="M4.5 1L5.7 3.6 8.5 4 6.5 6 7 8.7 4.5 7.4 2 8.7 2.5 6 0.5 4 3.3 3.6z" fill="white" opacity="0.9"/>
