@@ -234,8 +234,16 @@ const NAV_ITEMS = [
           {
             icon: 'grid',
             label: 'pyRevit',
-            sub: 'Python-powered Revit tools',
-            href: '/automation/pyrevit',
+            sub: 'Getting started — Python & the Revit API',
+            href: '/automation/pyrevit/getting-started',
+            status: 'live',
+          },
+          {
+            icon: 'zap',
+            label: 'pyRevit Practice',
+            sub: 'Hands-on tools & real workflows',
+            href: '/automation/pyrevit/practice',
+            status: 'live',
           },
         ],
       },
